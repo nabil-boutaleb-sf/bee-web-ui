@@ -8,17 +8,19 @@ This document outlines the development tasks for the Bee Web UI project.
 -   [x] Create `TASKS.md` to track progress.
 -   [x] Move existing test functionality from `index.html` to a new `test.html` page.
 -   [x] Create the new placeholder HTML files (`index.html`, `todos.html`, `facts.html`) in the `public/` directory.
--   [ ] Install the `beeai` SDK.
--   [ ] Create the basic Express server in `index.js`.
--   [ ] Create the initial `beeService.js` to use the `beeai` SDK.
+-   [x] Install the `beeai` SDK.
+-   [ ] Reinforce the container - do we need to link gh directly on container load?
+-   [x] Create the basic Express server in `index.js`.
+-   [x] Create the initial `beeService.js` to use the `beeai` SDK.
 -   [ ] Create the `.env` file and add the `BEE_API_TOKEN`.
 -   [ ] **Research**: Review the `beemcp` server repository for UI/UX inspiration.
+-   [ ] Restore and verify the functionality of the Test page (public/test.html and public/test.js).
 
 ## Phase 2: Backend Development
 
--   [ ] Implement `GET /`, `GET /todos`, and `GET /facts` routes in `index.js` to serve the HTML pages.
--   [ ] Implement the `GET /api/auth/status` endpoint using the `beeai` SDK.
--   [ ] Implement the `GET /api/todos` endpoint using the `beeai` SDK.
+-   [x] Implement `GET /`, `GET /todos`, and `GET /facts` routes in `index.js` to serve the HTML pages.
+-   [x] Implement the `GET /api/auth/status` endpoint using the `beeai` SDK.
+-   [ ] Implement `GET /api/todos` and `GET /api/facts` endpoints in `index.js`.
 -   [ ] Implement the `PUT /api/todos/:id/complete` endpoint using the `beeai` SDK.
 -   [ ] Implement the `DELETE /api/todos/:id` endpoint using the `beeai` SDK.
 -   [ ] Implement the `GET /api/facts` endpoint using the `beeai` SDK.
@@ -28,18 +30,23 @@ This document outlines the development tasks for the Bee Web UI project.
 
 ### Home Page (`index.html`)
 -   [x] Add navigation links to the Todos, Facts, and Test pages.
--   [ ] Call the `/api/auth/status` endpoint and display the connection status.
+-   [x] Call the `/api/auth/status` endpoint and display the connection status.
+-   [ ] Validate that the "status: connected to bee api" message is not a false positive.
 
 ### Todos Page (`todos.html` & `app.js`)
 -   [ ] Fetch and display the list of todos from `/api/todos`.
 -   [ ] Implement the "Complete" button functionality.
 -   [ ] Implement the "Delete" button functionality.
 -   [ ] Add loading and error state indicators.
+-   [ ] Investigate and fix "loading" state for Todos and Facts pages.
 
 ### Facts Page (`facts.html` & `app.js`)
 -   [ ] Fetch and display the list of facts from `/api/facts`.
 -   [ ] Implement the "Delete" button functionality.
 -   [ ] Add loading and error state indicators.
+
+### Test Page (`test.html` & `test.js`)
+-   [ ] Restore the Test page (`public/test.html` and `public/test.js`), preserving the original `test.js` as `public/test.original.js` for reference.
 
 ## Phase 4: Styling & Refinement
 

@@ -1,13 +1,4 @@
-// Load environment variables from .env file
 require('dotenv').config();
-
-// Validate that the API token is loaded. This prevents the app from
-// running and sending invalid requests if the .env file is missing or misconfigured.
-if (!process.env.BEE_API_TOKEN) {
-  console.error('FATAL ERROR: BEE_API_TOKEN is not defined. Please check your .env file.');
-  process.exit(1); // Exit the application with an error code.
-}
-
 const express = require('express');
 const path = require('path');
 const beeService = require('./services/beeService');
@@ -15,19 +6,58 @@ const beeService = require('./services/beeService');
 const app = express();
 const port = 3000;
 
-// Serve static files from the 'public' directory
+// Exit if the API token is not configured
+if (!process.env.BEE_API_TOKEN) {
+    console.error('FATAL ERROR: BEE_API_TOKEN is not defined. Please create a .env file with your token.');
+    process.exit(1);
+}
+
+// Serve static files (HTML, CSS, JS) from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API endpoint to get facts. Our frontend will call this.
-app.get('/api/facts', async (req, res) => {
-  try {
-    const facts = await beeService.getFacts();
-    res.json(facts);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch facts.' });
-  }
+// --- Page Routes ---
+
+// Home page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Todos page
+app.get('/todos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'todos.html'));
+});
+
+// Facts page
+app.get('/facts', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'facts.html'));
+});
+
+// --- API Routes ---
+
+// Endpoint to check authentication status
+app.get('/api/auth/status', async (req, res) => {
+    try {
+        const isAuthenticated = await beeService.checkAuthStatus();
+        res.json({ isAuthenticated });
+    } catch (error) {
+        console.error('Error checking auth status:', error);
+        res.status(500).json({ isAuthenticated: false, message: 'Failed to check authentication status.' });
+    }
+});
+
+// Endpoint to get todos
+app.get('/api/todos', async (req, res) => {
+    try {
+        const todos = await beeService.getTodos();
+        res.json(todos);
+    } catch (error) {
+        console.error('Error fetching todos:', error);
+        res.status(500).json({ message: 'Failed to fetch todos.' });
+    }
+});
+
+// TODO: Add PUT /api/todos/:id/complete and DELETE /api/todos/:id, DELETE /api/facts/:id
+
 app.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`);
+    console.log(`Bee Web UI listening at http://localhost:${port}`);
 });
