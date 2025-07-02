@@ -1,0 +1,9 @@
+# This file tells Docker which files and folders to ignore when building the image.
+
+# Ignore the node_modules folder, as it will be generated inside the container.
+node_modules
+
+# Ignore build artifacts and environment-specific files.
+.git
+.vscode
+.devcontainer

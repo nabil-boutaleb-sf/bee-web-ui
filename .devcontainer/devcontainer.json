@@ -1,0 +1,31 @@
+{
+	"name": "Bee Web UI",
+	"build": {
+		// Tells Dev Containers to use the Dockerfile in the project root
+		"dockerfile": "../Dockerfile"
+	},
+	// Add the GitHub CLI to the container
+	"features": {
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+	// These are VS Code extensions that will be installed *inside* the container
+	// so you have them ready for development.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+	
+				// "dbaeumer.vscode-eslint",
+				// "esbenp.prettier-vscode",
+				// "eamodio.gitlens",
+				"google.geminicodeassist",
+				"Gruntfuggly.todo-tree"
+			]
+		}
+	},
+	// This makes sure you are not running as the root user inside the container, which is a security best practice.
+	"remoteUser": "node",
+
+	// Forward the port from the container to your local machine so you can access it.
+	"forwardPorts": [3000]
+	// The 'npm install' command has been moved to the Dockerfile for better caching.
+}
