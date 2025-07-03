@@ -18,7 +18,8 @@
 				// "esbenp.prettier-vscode",
 				// "eamodio.gitlens",
 				"google.geminicodeassist",
-				"Gruntfuggly.todo-tree"
+				"Gruntfuggly.todo-tree",
+				"brave.vscode-pdf"
 			]
 		}
 	},

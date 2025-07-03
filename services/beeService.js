@@ -4,7 +4,7 @@ const bee = new Bee({ apiKey: process.env.BEE_API_TOKEN });
 
 async function getFacts() {
   try {
-    const facts = await bee.getFacts('me');
+    const facts = await bee.getFacts('me', { confirmed: false });
     return facts.facts; // The documentation shows facts are nested under a 'facts' property
   } catch (error) {
     console.error('Error fetching facts from Bee AI SDK:', error.message);
