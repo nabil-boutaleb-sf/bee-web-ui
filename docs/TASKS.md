@@ -9,11 +9,11 @@ This document outlines the development tasks for the Bee Web UI project.
 -   [x] Move existing test functionality from `index.html` to a new `test.html` page.
 -   [x] Create the new placeholder HTML files (`index.html`, `todos.html`, `facts.html`) in the `public/` directory.
 -   [x] Install the `beeai` SDK.
--   [ ] Reinforce the container - do we need to link gh directly on container load?
+-   [x] Reinforce the container - do we need to link gh directly on container load? (Answer - no need)
+-   [x] Make sure pgrep is set up, set Gemini CLI to ensure I have checkpoints where there's enough tokens to document in detail what's been happening
 -   [x] Create the basic Express server in `index.js`.
 -   [x] Create the initial `beeService.js` to use the `beeai` SDK.
--   [ ] Create the `.env` file and add the `BEE_API_TOKEN`.
--   [ ] **Research**: Review the `beemcp` server repository for UI/UX inspiration.
+-   [x] Create the `.env` file and add the `BEE_API_TOKEN`.
 -   [ ] Restore and verify the functionality of the Test page (public/test.html and public/test.js).
 
 ## Phase 2: Backend Development
@@ -53,3 +53,6 @@ This document outlines the development tasks for the Bee Web UI project.
 -   [ ] Apply consistent and clean styling to all pages using `style.css`.
 -   [ ] Review and refactor the code for clarity and efficiency.
 -   [ ] Final testing of all features.
+
+## Phase 5: Future improvements
+-   [ ] **Research**: Review the `beemcp` server repository for UI/UX inspiration.

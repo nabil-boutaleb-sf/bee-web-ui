@@ -56,6 +56,17 @@ app.get('/api/todos', async (req, res) => {
     }
 });
 
+// Endpoint to get facts
+app.get('/api/facts', async (req, res) => {
+    try {
+        const facts = await beeService.getFacts();
+        res.json(facts);
+    } catch (error) {
+        console.error('Error fetching facts:', error);
+        res.status(500).json({ message: 'Failed to fetch facts.' });
+    }
+});
+
 // TODO: Add PUT /api/todos/:id/complete and DELETE /api/todos/:id, DELETE /api/facts/:id
 
 app.listen(port, () => {
