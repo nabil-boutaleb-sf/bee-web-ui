@@ -14,7 +14,7 @@ This document outlines the development tasks for the Bee Web UI project.
 -   [x] Create the basic Express server in `index.js`.
 -   [x] Create the initial `beeService.js` to use the `beeai` SDK.
 -   [x] Create the `.env` file and add the `BEE_API_TOKEN`.
--   [ ] Restore and verify the functionality of the Test page (public/test.html and public/test.js).
+-   [x] Restore and verify the functionality of the Test page (public/test.html and public/test.js).
 
 ## Phase 2: Backend Development
 
@@ -25,6 +25,7 @@ This document outlines the development tasks for the Bee Web UI project.
 -   [ ] Implement the `DELETE /api/todos/:id` endpoint using the `beeai` SDK.
 -   [ ] Implement the `GET /api/facts` endpoint using the `beeai` SDK.
 -   [ ] Implement the `DELETE /api/facts/:id` endpoint using the `beeai` SDK.
+-   [ ] Implement the `PUT /api/facts/:id/confirm` endpoint using the `beeai` SDK.
 
 ## Phase 3: Frontend Development
 
@@ -41,9 +42,16 @@ This document outlines the development tasks for the Bee Web UI project.
 -   [ ] Investigate and fix "loading" state for Todos and Facts pages.
 
 ### Facts Page (`facts.html` & `app.js`)
--   [ ] Fetch and display the list of facts from `/api/facts`.
--   [ ] Implement the "Delete" button functionality.
--   [ ] Add loading and error state indicators.
+-   [x] Fetch and display the list of facts from `/api/facts`.
+-   [x] Visually distinguish between confirmed and unconfirmed facts.
+-   [x] Implement the "Confirm" button functionality for unconfirmed facts.
+-   [x] Implement the "Delete" button functionality for all facts.
+-   [ ] Implement the "Edit" button functionality for all facts.
+-   [ ] Add unconfirm button.
+-   [ ] Add breadcrumbs on pagesso i can navigate back.
+-   [x] Add loading and error state indicators.
+-   [x] Separate confirmed and unconfirmed facts into distinct sections on the page.
+-   [x] Add pagination numbers (e.g., "Page 1 of X") to the facts lists.
 
 ### Test Page (`test.html` & `test.js`)
 -   [ ] Restore the Test page (`public/test.html` and `public/test.js`), preserving the original `test.js` as `public/test.original.js` for reference.
@@ -56,3 +64,4 @@ This document outlines the development tasks for the Bee Web UI project.
 
 ## Phase 5: Future improvements
 -   [ ] **Research**: Review the `beemcp` server repository for UI/UX inspiration.
+-   [ ] **Research**: Investigate the use of `Gemini.md`.

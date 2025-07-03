@@ -18,8 +18,11 @@ The primary goal is to create a functional proof-of-concept that solves the imme
     -   Mark a todo as complete.
     -   Delete a todo.
 -   **Facts**:
-    -   View a list of all recorded facts on a dedicated page.
-    -   Delete a fact.
+    -   View a list of all recorded facts (both confirmed and unconfirmed) on a dedicated page.
+    -   Visually distinguish between confirmed and unconfirmed facts.
+    -   For unconfirmed facts, provide a "Confirm" button.
+    -   For all facts, provide an "Edit" button to modify the text.
+    -   For all facts, provide a "Delete" button.
 
 ### Out-of-Scope (Future Enhancements)
 
@@ -59,6 +62,8 @@ The Express server will expose the following endpoints for the frontend to consu
 -   `DELETE /api/todos/:id`: Deletes a todo.
 -   `GET /api/facts`: Fetches the list of facts from the Bee API.
 -   `DELETE /api/facts/:id`: Deletes a fact.
+    -   `PUT /api/facts/:id/confirm`: Confirms a fact.
+    -   `PUT /api/facts/:id`: Updates a fact's text.
 
 ## 4. Data & Security
 
@@ -84,9 +89,14 @@ The user interface will be a clean, multi-page application.
     -   Each todo item will have a "Complete" button and a "Delete" button.
     -   Completed todos will be visually distinguished (e.g., grayed out with a line-through).
 -   **Facts Page (`/facts`)**:
-    -   Displays a list of all facts.
-    -   Each fact item will have a "Delete" button.
+    -   The Facts page will be divided into two main sections: "Confirmed Facts" and "Unconfirmed Facts".
+    -   Each section will display its respective list of facts with independent pagination controls, including page numbers (e.g., "Page 1 of X").
+    -   Unconfirmed facts will be visually distinguished from confirmed facts (e.g., different background color or an icon).
+    -   Each fact item will have action buttons on the right edge.
+    -   Unconfirmed facts will have "Confirm", "Edit", and "Delete" buttons.
+    -   Confirmed facts will have "Edit" and "Delete" buttons.
     -   Full text of the fact will be displayed.
+    -   Loading indicators will be displayed for each section while facts are being fetched.
 
 ### User Experience Elements
 

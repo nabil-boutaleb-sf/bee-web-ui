@@ -42,3 +42,16 @@ To create a simple, personal-use web application to manage "todos" and "facts" f
 - Investigate and fix the "loading" state for Todos and Facts pages.
 - Restore the Test page functionality.
 - Implement the remaining API endpoints and frontend logic for Todos and Facts.
+
+---
+*July 3, 2025*
+- **Recap of Recent Changes**: Reviewed recent commits, which included repairing the test page, organizing project files, and adding the `beeai` SDK. The `app.js` file was also modified to address the "stuck on loading" issue.
+- **Continuation of Work**: The session began by reviewing `DESIGN.md` to determine the next steps. An attempt was made to create the `.env` file for the API token as specified in the design, but this action was cancelled by the user.
+- **Facts Functionality Expanded**: Based on user feedback, the requirements for the "Facts" page have been clarified and expanded. The UI will now explicitly show both confirmed and unconfirmed facts, with buttons to "Confirm" unconfirmed facts and "Delete" any fact. All relevant documentation (`DESIGN.md`, `TASKS.md`, `test_cases.md`) has been updated to reflect this more detailed requirement.
+- **Facts Page Implementation**: Implemented the expanded facts page functionality. This included:
+    - Fixing a bug where `bee.confirmFact` was not a function by replacing it with the correct `bee.updateFact` method from the SDK documentation.
+    - Improving the UI with a more modern stylesheet.
+    - Adding pagination to handle a large number of facts.
+    - **Refined Facts Display**: Implemented separate API calls for confirmed and unconfirmed facts to ensure accurate display and movement between lists upon confirmation. The UI now correctly separates and displays confirmed and unconfirmed facts, each with its own pagination and loading indicators.
+- **User Preference Noted**: The user prefers to run the server manually using `npm start` in a separate terminal.
+- **Documentation Updates**: Updated `DESIGN.md`, `TASKS.md`, and `test_cases.md` to reflect the new fact editing feature, the refined facts page display, and the `Gemini.md` research task.

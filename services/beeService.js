@@ -2,13 +2,31 @@ const Bee = require('beeai');
 
 const bee = new Bee({ apiKey: process.env.BEE_API_TOKEN });
 
-async function getFacts() {
+async function getFacts(confirmed, page = 1, limit = 10) {
   try {
-    const facts = await bee.getFacts('me', { confirmed: false });
-    return facts.facts; // The documentation shows facts are nested under a 'facts' property
+    const facts = await bee.getFacts('me', { confirmed, page, limit });
+    return facts;
   } catch (error) {
     console.error('Error fetching facts from Bee AI SDK:', error.message);
     throw new Error('Failed to fetch facts from Bee AI SDK.');
+  }
+}
+
+async function deleteFact(factId) {
+  try {
+    await bee.deleteFact('me', factId);
+  } catch (error) {
+    console.error(`Error deleting fact ${factId} from Bee AI SDK:`, error.message);
+    throw new Error('Failed to delete fact from Bee AI SDK.');
+  }
+}
+
+async function confirmFact(factId) {
+  try {
+    await bee.updateFact('me', factId, { confirmed: true });
+  } catch (error) {
+    console.error(`Error confirming fact ${factId} from Bee AI SDK:`, error.message);
+    throw new Error('Failed to confirm fact from Bee AI SDK.');
   }
 }
 
@@ -35,6 +53,8 @@ async function checkAuthStatus() {
 
 module.exports = {
   getFacts,
+  deleteFact,
+  confirmFact,
   getTodos,
   checkAuthStatus
 };

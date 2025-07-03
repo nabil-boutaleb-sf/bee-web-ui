@@ -59,7 +59,10 @@ app.get('/api/todos', async (req, res) => {
 // Endpoint to get facts
 app.get('/api/facts', async (req, res) => {
     try {
-        const facts = await beeService.getFacts();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const confirmed = req.query.confirmed === 'true' ? true : (req.query.confirmed === 'false' ? false : undefined);
+        const facts = await beeService.getFacts(confirmed, page, limit);
         res.json(facts);
     } catch (error) {
         console.error('Error fetching facts:', error);
@@ -68,6 +71,28 @@ app.get('/api/facts', async (req, res) => {
 });
 
 // TODO: Add PUT /api/todos/:id/complete and DELETE /api/todos/:id, DELETE /api/facts/:id
+
+// Endpoint to delete a fact
+app.delete('/api/facts/:id', async (req, res) => {
+    try {
+        await beeService.deleteFact(req.params.id);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting fact:', error);
+        res.status(500).json({ message: 'Failed to delete fact.' });
+    }
+});
+
+// Endpoint to confirm a fact
+app.put('/api/facts/:id/confirm', async (req, res) => {
+    try {
+        await beeService.confirmFact(req.params.id);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error confirming fact:', error);
+        res.status(500).json({ message: 'Failed to confirm fact.' });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Bee Web UI listening at http://localhost:${port}`);

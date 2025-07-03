@@ -120,12 +120,16 @@
 ### User Case 3: Managing Facts
 
 1.  User navigates to the Facts page (`facts.html`).
-2.  The application fetches facts from `/api/facts`.
-3.  While fetching, a loading indicator is shown.
-4.  Upon successful retrieval, the facts are displayed.
-5.  User clicks "Delete" on a fact.
-6.  The application sends a `DELETE` request to `/api/facts/:id`.
-7.  The fact is removed from the display.
+2.  The application makes separate requests to `/api/facts?confirmed=true` and `/api/facts?confirmed=false`.
+3.  While fetching, loading indicators are shown for each section.
+4.  Upon successful retrieval, confirmed facts are displayed in the "Confirmed Facts" section, and unconfirmed facts are displayed in the "Unconfirmed Facts" section.
+5.  User clicks "Confirm" on an unconfirmed fact.
+6.  The application sends a `PUT` request to `/api/facts/:id/confirm`.
+7.  Both fact lists are reloaded, and the fact moves from the "Unconfirmed Facts" section to the "Confirmed Facts" section.
+8.  User clicks "Delete" on a fact.
+9.  The application sends a `DELETE` request to `/api/facts/:id`.
+10. Both fact lists are reloaded, and the fact is removed from the display.
+11. User navigates through pagination using "Next" and "Previous" buttons for either list.
 
 ### User Case 4: Using the Test Page
 
