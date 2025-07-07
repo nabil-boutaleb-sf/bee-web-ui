@@ -14,6 +14,8 @@ if (!process.env.BEE_API_TOKEN) {
 
 // Serve static files (HTML, CSS, JS) from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json()); // Add this line to parse JSON bodies
+
 
 // --- Page Routes ---
 
@@ -32,6 +34,11 @@ app.get('/facts', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'facts.html'));
 });
 
+// Conversations page
+app.get('/conversations', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'conversations.html'));
+});
+
 // --- API Routes ---
 
 // Endpoint to check authentication status
@@ -48,11 +55,13 @@ app.get('/api/auth/status', async (req, res) => {
 // Endpoint to get todos
 app.get('/api/todos', async (req, res) => {
     try {
-        const todos = await beeService.getTodos();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const todos = await beeService.getTodos(page, limit);
         res.json(todos);
     } catch (error) {
-        console.error('Error fetching todos:', error);
-        res.status(500).json({ message: 'Failed to fetch todos.' });
+        console.error('Error fetching todos:', error.message);
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -70,7 +79,28 @@ app.get('/api/facts', async (req, res) => {
     }
 });
 
-// TODO: Add PUT /api/todos/:id/complete and DELETE /api/todos/:id, DELETE /api/facts/:id
+
+// Endpoint to complete a todo
+app.put('/api/todos/:id/complete', async (req, res) => {
+    try {
+        await beeService.completeTodo(req.params.id);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error completing todo:', error);
+        res.status(500).json({ message: 'Failed to complete todo.' });
+    }
+});
+
+// Endpoint to delete a todo
+app.delete('/api/todos/:id', async (req, res) => {
+    try {
+        await beeService.deleteTodo(req.params.id);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting todo:', error);
+        res.status(500).json({ message: 'Failed to delete todo.' });
+    }
+});
 
 // Endpoint to delete a fact
 app.delete('/api/facts/:id', async (req, res) => {
@@ -91,6 +121,39 @@ app.put('/api/facts/:id/confirm', async (req, res) => {
     } catch (error) {
         console.error('Error confirming fact:', error);
         res.status(500).json({ message: 'Failed to confirm fact.' });
+    }
+});
+
+// Endpoint to unconfirm a fact
+app.put('/api/facts/:id/unconfirm', async (req, res) => {
+    try {
+        await beeService.unconfirmFact(req.params.id);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error unconfirming fact:', error);
+        res.status(500).json({ message: 'Failed to unconfirm fact.' });
+    }
+});
+
+// Endpoint to update a fact
+app.put('/api/facts/:id', async (req, res) => {
+    try {
+        await beeService.updateFact(req.params.id, req.body.text);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error updating fact:', error.message);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Endpoint to get conversations
+app.get('/api/conversations', async (req, res) => {
+    try {
+        const conversations = await beeService.getConversations();
+        res.json(conversations);
+    } catch (error) {
+        console.error('Error fetching conversations:', error.message);
+        res.status(500).json({ message: error.message });
     }
 });
 

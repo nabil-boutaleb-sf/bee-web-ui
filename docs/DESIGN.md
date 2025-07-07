@@ -2,13 +2,13 @@
 
 ## 1. Overview
 
-The official `bee.computer` application has a user interface that makes it difficult to manage generated data, specifically "todos" and "facts". It is often not possible to remove or edit these items.
+The official `bee.computer` application has a user interface that makes it difficult to manage generated data, specifically "todos", "facts", and "conversations". It is often not possible to remove or edit these items.
 
 This project aims to build a simple, personal-use web application that acts as an alternative UI. It will directly leverage the `bee.computer` API to provide a clean and functional interface for managing this data. This document outlines the design and architecture for this proof-of-concept application.
 
 ## 2. Goals & Scope
 
-The primary goal is to create a functional proof-of-concept that solves the immediate problem of being unable to edit/delete todos and facts.
+The primary goal is to create a functional proof-of-concept that solves the immediate problem of being unable to edit/delete todos, facts, and conversations.
 
 ### In-Scope (MVP)
 
@@ -20,15 +20,18 @@ The primary goal is to create a functional proof-of-concept that solves the imme
 -   **Facts**:
     -   View a list of all recorded facts (both confirmed and unconfirmed) on a dedicated page.
     -   Visually distinguish between confirmed and unconfirmed facts.
-    -   For unconfirmed facts, provide a "Confirm" button.
+    -   For unconfirmed facts, provide a "Confirm" icon button.
+    -   For confirmed facts, provide an "Unconfirm" icon button.
     -   For all facts, provide an "Edit" button to modify the text.
-    -   For all facts, provide a "Delete" button.
+    -   For all facts, provide a "Delete" icon button.
+-   **Conversations**:
+    -   View a list of all conversations on a dedicated page.
 
 ### Out-of-Scope (Future Enhancements)
 
 -   Creating new todos or facts.
 -   Editing the text content of existing items.
--   Viewing daily summaries or conversations.
+-   Viewing daily summaries.
 -   A user login system (the app is for personal use and will rely on a pre-configured API token).
 -   Advanced filtering, sorting, or searching.
 -   Confirmation dialogs for single deletions (to maintain a streamlined workflow).
@@ -56,14 +59,17 @@ The Express server will expose the following endpoints for the frontend to consu
 -   `GET /`: Serves the main `index.html` landing page.
 -   `GET /todos`: Serves the `todos.html` page.
 -   `GET /facts`: Serves the `facts.html` page.
+-   `GET /conversations`: Serves the `conversations.html` page.
 -   `GET /api/auth/status`: Checks if the backend is properly authenticated with the Bee API.
 -   `GET /api/todos`: Fetches the list of todos from the Bee API.
--   `PUT /api/todos/:id/complete`: Marks a todo as complete. The Bee API does not delete completed todos, so they may still appear in the main list.
+-   `PUT /api/todos/:id/complete`: Marks a todo as complete.
 -   `DELETE /api/todos/:id`: Deletes a todo.
 -   `GET /api/facts`: Fetches the list of facts from the Bee API.
 -   `DELETE /api/facts/:id`: Deletes a fact.
-    -   `PUT /api/facts/:id/confirm`: Confirms a fact.
-    -   `PUT /api/facts/:id`: Updates a fact's text.
+-   `PUT /api/facts/:id/confirm`: Confirms a fact.
+-   `PUT /api/facts/:id/unconfirm`: Unconfirms a fact.
+-   `PUT /api/facts/:id`: Updates a fact's text.
+-   `GET /api/conversations`: Fetches the list of conversations from the Bee API.
 
 ## 4. Data & Security
 
@@ -83,7 +89,7 @@ BEE_API_BASE_URL="https://api.bee.computer/v1"
 
 The user interface will be a clean, multi-page application.
 
--   **Home Page (`/`)**: A simple landing page that confirms the application is running and the Bee API token is configured correctly. It will provide navigation links to the "Todos" and "Facts" pages.
+-   **Home Page (`/`)**: A simple landing page that confirms the application is running and the Bee API token is configured correctly. It will provide navigation links to the "Todos", "Facts", and "Conversations" pages.
 -   **Todos Page (`/todos`)**:
     -   Displays a list of pending and completed todos.
     -   Each todo item will have a "Complete" button and a "Delete" button.
@@ -93,10 +99,14 @@ The user interface will be a clean, multi-page application.
     -   Each section will display its respective list of facts with independent pagination controls, including page numbers (e.g., "Page 1 of X").
     -   Unconfirmed facts will be visually distinguished from confirmed facts (e.g., different background color or an icon).
     -   Each fact item will have action buttons on the right edge.
-    -   Unconfirmed facts will have "Confirm", "Edit", and "Delete" buttons.
-    -   Confirmed facts will have "Edit" and "Delete" buttons.
+    -   Unconfirmed facts will have "Confirm" and "Delete" icon buttons.
+    -   Confirmed facts will have "Unconfirm" and "Delete" icon buttons.
     -   Full text of the fact will be displayed.
     -   Loading indicators will be displayed for each section while facts are being fetched.
+-   **Conversations Page (`/conversations`)**:
+    -   Displays a list of conversations.
+    -   Each conversation item will show a summary.
+    -   Loading indicators will be displayed while conversations are being fetched.
 
 ### User Experience Elements
 
@@ -113,6 +123,7 @@ The user interface will be a clean, multi-page application.
 │   ├── index.html        # Main landing page
 │   ├── todos.html        # Page for managing todos
 │   ├── facts.html        # Page for managing facts
+│   ├── conversations.html # Page for managing conversations
 │   ├── style.css         # Shared styles for the UI
 │   └── app.js            # Frontend JavaScript logic
 ├── services/

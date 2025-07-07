@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const authStatusDiv = document.getElementById('auth-status');
     const factsContainer = document.getElementById('facts-container');
+    const conversationsContainer = document.getElementById('conversations-container');
+    const todosContainer = document.getElementById('todos-container');
 
     // --- Authentication Status (for index.html) ---
     if (authStatusDiv) {
@@ -22,11 +24,162 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // --- Todos Page (for todos.html) ---
+    if (todosContainer) {
+        loadTodos();
+    }
+
     // --- Facts Page (for facts.html) ---
     if (factsContainer) {
         loadFacts();
     }
+
+    // --- Conversations Page (for conversations.html) ---
+    if (conversationsContainer) {
+        loadConversations();
+    }
 });
+
+
+let currentPageTodos = 1;
+const todosLimit = 10;
+
+async function loadTodos() {
+    const incompleteTodosList = document.getElementById('incomplete-todos-list');
+    const completedTodosList = document.getElementById('completed-todos-list');
+
+    try {
+        const response = await fetch(`/api/todos?page=${currentPageTodos}&limit=${todosLimit}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const todos = data.todos; // Correctly access the todos array
+
+        incompleteTodosList.innerHTML = '';
+        completedTodosList.innerHTML = '';
+
+        const incompleteTodos = todos.filter(todo => !todo.completed);
+        const completedTodos = todos.filter(todo => todo.completed);
+
+        if (incompleteTodos.length === 0) {
+            incompleteTodosList.innerHTML = '<p>No incomplete todos found.</p>';
+        } else {
+            const ul = document.createElement('ul');
+            incompleteTodos.forEach(todo => {
+                const li = document.createElement('li');
+                li.textContent = todo.text;
+                li.dataset.todoId = todo.id;
+
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container');
+
+                const completeButton = document.createElement('button');
+                completeButton.innerHTML = '<i class="fas fa-check"></i>';
+                completeButton.classList.add('icon-btn', 'confirm-btn');
+                completeButton.onclick = () => completeTodo(todo.id);
+                buttonContainer.appendChild(completeButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.classList.add('icon-btn', 'delete-btn');
+                deleteButton.onclick = () => deleteTodo(todo.id);
+                buttonContainer.appendChild(deleteButton);
+
+                li.appendChild(buttonContainer);
+                ul.appendChild(li);
+            });
+            incompleteTodosList.appendChild(ul);
+        }
+
+        if (completedTodos.length === 0) {
+            completedTodosList.innerHTML = '<p>No completed todos found.</p>';
+        } else {
+            const ul = document.createElement('ul');
+            completedTodos.forEach(todo => {
+                const li = document.createElement('li');
+                li.textContent = todo.text;
+                li.dataset.todoId = todo.id;
+                li.classList.add('completed');
+
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container');
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.classList.add('icon-btn', 'delete-btn');
+                deleteButton.onclick = () => deleteTodo(todo.id);
+                buttonContainer.appendChild(deleteButton);
+
+                li.appendChild(buttonContainer);
+                ul.appendChild(li);
+            });
+            completedTodosList.appendChild(ul);
+        }
+
+        // Pagination for todos
+        const paginationContainer = document.createElement('div');
+        paginationContainer.classList.add('pagination-container');
+
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.disabled = currentPageTodos === 1;
+        prevButton.onclick = () => {
+            currentPageTodos--;
+            loadTodos();
+        };
+        paginationContainer.appendChild(prevButton);
+
+        const pageInfo = document.createElement('span');
+        pageInfo.textContent = `Page ${currentPageTodos} of ${data.totalPages}`;
+        paginationContainer.appendChild(pageInfo);
+
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.disabled = todos.length < todosLimit;
+        nextButton.onclick = () => {
+            currentPageTodos++;
+            loadTodos();
+        };
+        paginationContainer.appendChild(nextButton);
+
+        const todosContainer = document.getElementById('todos-container');
+        todosContainer.appendChild(paginationContainer);
+
+    } catch (error) {
+        console.error('Failed to load todos:', error);
+        incompleteTodosList.innerHTML = '<p>Error loading incomplete todos. Check the console for details.</p>';
+        completedTodosList.innerHTML = '<p>Error loading completed todos. Check the console for details.</p>';
+    }
+}
+
+async function completeTodo(todoId) {
+    try {
+        const response = await fetch(`/api/todos/${todoId}/complete`, { method: 'PUT' });
+        if (response.ok) {
+            loadTodos();
+        } else {
+            alert('Failed to complete todo.');
+        }
+    } catch (error) {
+        console.error('Error completing todo:', error);
+        alert('Error completing todo.');
+    }
+}
+
+async function deleteTodo(todoId) {
+    try {
+        const response = await fetch(`/api/todos/${todoId}`, { method: 'DELETE' });
+        if (response.ok) {
+            loadTodos();
+        } else {
+            alert('Failed to delete todo.');
+        }
+    } catch (error) {
+        console.error('Error deleting todo:', error);
+        alert('Error deleting todo.');
+    }
+}
 
 let currentPageConfirmed = 1;
 let currentPageUnconfirmed = 1;
@@ -62,9 +215,21 @@ async function loadConfirmedFacts() {
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
 
+                const unconfirmButton = document.createElement('button');
+                unconfirmButton.innerHTML = '<i class="fas fa-times"></i>';
+                unconfirmButton.classList.add('icon-btn', 'unconfirm-btn');
+                unconfirmButton.onclick = () => unconfirmFact(fact.id);
+                buttonContainer.appendChild(unconfirmButton);
+
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                editButton.classList.add('icon-btn', 'edit-btn');
+                editButton.onclick = () => editFact(li, fact.id, fact.text);
+                buttonContainer.appendChild(editButton);
+
                 const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.classList.add('delete-btn');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.classList.add('icon-btn', 'delete-btn');
                 deleteButton.onclick = () => deleteFact(fact.id);
                 buttonContainer.appendChild(deleteButton);
 
@@ -134,14 +299,20 @@ async function loadUnconfirmedFacts() {
                 buttonContainer.classList.add('button-container');
 
                 const confirmButton = document.createElement('button');
-                confirmButton.textContent = 'Confirm';
-                confirmButton.classList.add('confirm-btn');
+                confirmButton.innerHTML = '<i class="fas fa-check"></i>';
+                confirmButton.classList.add('icon-btn', 'confirm-btn');
                 confirmButton.onclick = () => confirmFact(fact.id);
                 buttonContainer.appendChild(confirmButton);
 
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                editButton.classList.add('icon-btn', 'edit-btn');
+                editButton.onclick = () => editFact(li, fact.id, fact.text);
+                buttonContainer.appendChild(editButton);
+
                 const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.classList.add('delete-btn');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.classList.add('icon-btn', 'delete-btn');
                 deleteButton.onclick = () => deleteFact(fact.id);
                 buttonContainer.appendChild(deleteButton);
 
@@ -210,5 +381,124 @@ async function confirmFact(factId) {
     } catch (error) {
         console.error('Error confirming fact:', error);
         alert('Error confirming fact.');
+    }
+}
+
+async function unconfirmFact(factId) {
+    try {
+        const response = await fetch(`/api/facts/${factId}/unconfirm`, { method: 'PUT' });
+        if (response.ok) {
+            loadFacts(); // Reload both lists after unconfirming
+        } else {
+            alert('Failed to unconfirm fact.');
+        }
+    } catch (error) {
+        console.error('Error unconfirming fact:', error);
+        alert('Error unconfirming fact.');
+    }
+}
+
+async function updateFact(factId, text) {
+    try {
+        const response = await fetch(`/api/facts/${factId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text })
+        });
+        if (response.ok) {
+            loadFacts();
+        } else {
+            alert('Failed to update fact.');
+        }
+    } catch (error) {
+        console.error('Error updating fact:', error);
+        alert('Error updating fact.');
+    }
+}
+
+function editFact(li, factId, currentText) {
+    const originalContent = li.innerHTML; // Save the original content
+    li.innerHTML = ''; // Clear the list item
+
+    const form = document.createElement('form');
+    form.classList.add('edit-fact-form');
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        updateFact(factId, input.value);
+    };
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentText;
+    input.classList.add('edit-fact-input');
+    form.appendChild(input);
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('button-container');
+
+    const saveButton = document.createElement('button');
+    saveButton.innerHTML = '<i class="fas fa-save"></i>';
+    saveButton.type = 'submit';
+    saveButton.classList.add('icon-btn', 'confirm-btn');
+    buttonContainer.appendChild(saveButton);
+
+    const cancelButton = document.createElement('button');
+    cancelButton.innerHTML = '<i class="fas fa-times"></i>';
+    cancelButton.type = 'button';
+    cancelButton.classList.add('icon-btn', 'delete-btn');
+    cancelButton.onclick = () => {
+        li.innerHTML = originalContent; // Restore original content
+        // Re-attach event listeners
+        const editButton = li.querySelector('.edit-btn');
+        if (editButton) {
+            editButton.onclick = () => editFact(li, factId, currentText);
+        }
+        const deleteButton = li.querySelector('.delete-btn');
+        if (deleteButton) {
+            deleteButton.onclick = () => deleteFact(factId);
+        }
+        const confirmButton = li.querySelector('.confirm-btn');
+        if (confirmButton) {
+            confirmButton.onclick = () => confirmFact(factId);
+        }
+        const unconfirmButton = li.querySelector('.unconfirm-btn');
+        if (unconfirmButton) {
+            unconfirmButton.onclick = () => unconfirmFact(factId);
+        }
+    };
+    buttonContainer.appendChild(cancelButton);
+
+    form.appendChild(buttonContainer);
+    li.appendChild(form);
+    input.focus();
+}
+
+async function loadConversations() {
+    const conversationsContainer = document.getElementById('conversations-container');
+    try {
+        const response = await fetch('/api/conversations');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const conversations = await response.json();
+
+        conversationsContainer.innerHTML = '';
+
+        if (conversations.length === 0) {
+            conversationsContainer.innerHTML = '<p>No conversations found.</p>';
+        } else {
+            const ul = document.createElement('ul');
+            conversations.forEach(conversation => {
+                const li = document.createElement('li');
+                li.textContent = conversation.summary;
+                ul.appendChild(li);
+            });
+            conversationsContainer.appendChild(ul);
+        }
+    } catch (error) {
+        console.error('Failed to load conversations:', error);
+        conversationsContainer.innerHTML = '<p>Error loading conversations. Check the console for details.</p>';
     }
 }

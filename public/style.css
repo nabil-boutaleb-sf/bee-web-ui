@@ -78,22 +78,55 @@ button:hover {
     transform: translateY(-1px);
 }
 
-.confirm-btn {
+/* Icon Button Styles */
+.icon-btn {
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    text-align: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.icon-btn.confirm-btn {
+    color: #28a745; /* Green */
+}
+
+.icon-btn.delete-btn {
+    color: #dc3545; /* Red */
+}
+
+.icon-btn.unconfirm-btn {
+    color: #ffc107; /* Yellow */
+}
+
+.icon-btn:hover {
+    color: #fff; /* White icon on hover */
+}
+
+.icon-btn.confirm-btn:hover {
     background-color: #28a745;
-    color: white;
 }
 
-.confirm-btn:hover {
-    background-color: #218838;
-}
-
-.delete-btn {
+.icon-btn.delete-btn:hover {
     background-color: #dc3545;
-    color: white;
 }
 
-.delete-btn:hover {
-    background-color: #c82333;
+.icon-btn.unconfirm-btn:hover {
+    background-color: #ffc107;
+}
+
+.icon-btn.edit-btn {
+    color: #007bff; /* Blue */
+}
+
+.icon-btn.edit-btn:hover {
+    background-color: #007bff;
+    color: #fff; /* Make icon white on hover */
 }
 
 /* Auth Status Styles */
@@ -120,4 +153,36 @@ nav a {
 
 nav a:hover {
     color: #0056b3;
+}
+
+/* Edit Fact Form */
+.edit-fact-form {
+    display: flex;
+    width: 100%;
+}
+
+.edit-fact-input {
+    flex-grow: 1;
+    padding: 0.8rem; /* Increased padding */
+    font-size: 1rem; /* Increased font size */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.save-btn, .cancel-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 0.5rem;
+}
+
+.save-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
 }

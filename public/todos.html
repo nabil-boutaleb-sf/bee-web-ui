@@ -5,12 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todos - Bee Web UI</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <header>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/todos">Todos</a>
+            <a href="/facts">Facts</a>
+            <a href="/conversations">Conversations</a>
+        </nav>
+    </header>
     <main>
         <h1>Todos</h1>
         <div id="todos-container">
-            <p>Loading todos...</p>
+            <h2>Incomplete Todos</h2>
+            <div id="incomplete-todos-list">
+                <p>Loading incomplete todos...</p>
+            </div>
+            <h2>Completed Todos</h2>
+            <div id="completed-todos-list">
+                <p>Loading completed todos...</p>
+            </div>
         </div>
     </main>
     <script src="app.js"></script>

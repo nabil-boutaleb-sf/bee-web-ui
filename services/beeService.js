@@ -30,10 +30,10 @@ async function confirmFact(factId) {
   }
 }
 
-async function getTodos() {
+async function getTodos(page = 1, limit = 10) {
   try {
-    const todos = await bee.getTodos('me');
-    return todos.todos; // The documentation shows todos are nested under a 'todos' property
+    const response = await bee.getTodos('me', { page, limit });
+    return response;
   } catch (error) {
     console.error('Error fetching todos from Bee AI SDK:', error.message);
     throw new Error('Failed to fetch todos from Bee AI SDK.');
@@ -43,11 +43,73 @@ async function getTodos() {
 async function checkAuthStatus() {
   try {
     // Attempt to fetch facts as a way to verify authentication
+    console.log('Attempting to check authentication status...');
     await bee.getFacts('me'); 
+    console.log('Authentication check successful.');
     return true;
   } catch (error) {
     console.error('Authentication check failed with Bee AI SDK:', error.message);
+    console.error('Full error object:', error);
     return false;
+  }
+}
+
+async function getFacts(confirmed, page = 1, limit = 10) {
+  try {
+    console.log(`Fetching facts with confirmed=${confirmed}, page=${page}, limit=${limit}`);
+    const facts = await bee.getFacts('me', { confirmed, page, limit });
+    console.log('Facts fetched successfully:', facts);
+    return facts;
+  } catch (error) {
+    console.error('Error fetching facts from Bee AI SDK:', error.message);
+    console.error('Full error object:', error);
+    throw new Error('Failed to fetch facts from Bee AI SDK.');
+  }
+}
+
+async function completeTodo(todoId) {
+  try {
+    await bee.updateTodo('me', todoId, { completed: true });
+  } catch (error) {
+    console.error(`Error completing todo ${todoId} from Bee AI SDK:`, error.message);
+    throw new Error('Failed to complete todo from Bee AI SDK.');
+  }
+}
+
+async function deleteTodo(todoId) {
+  try {
+    await bee.deleteTodo('me', todoId);
+  } catch (error) {
+    console.error(`Error deleting todo ${todoId} from Bee AI SDK:`, error.message);
+    throw new Error('Failed to delete todo from Bee AI SDK.');
+  }
+}
+
+async function unconfirmFact(factId) {
+  try {
+    await bee.updateFact('me', factId, { confirmed: false });
+  } catch (error) {
+    console.error(`Error unconfirming fact ${factId} from Bee AI SDK:`, error.message);
+    throw new Error('Failed to unconfirm fact from Bee AI SDK.');
+  }
+}
+
+async function updateFact(factId, text) {
+  try {
+    await bee.updateFact('me', factId, { text });
+  } catch (error) {
+    console.error(`Error updating fact ${factId} from Bee AI SDK:`, error.message);
+    throw new Error('Failed to update fact from Bee AI SDK.');
+  }
+}
+
+async function getConversations() {
+  try {
+    const response = await bee.getConversations('me');
+    return response.conversations;
+  } catch (error) {
+    console.error('Error fetching conversations from Bee AI SDK:', error.message);
+    throw new Error('Failed to fetch conversations from Bee AI SDK.');
   }
 }
 
@@ -56,5 +118,10 @@ module.exports = {
   deleteFact,
   confirmFact,
   getTodos,
-  checkAuthStatus
+  checkAuthStatus,
+  completeTodo,
+  deleteTodo,
+  unconfirmFact,
+  updateFact,
+  getConversations
 };
