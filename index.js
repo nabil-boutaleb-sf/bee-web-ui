@@ -7,15 +7,19 @@ const app = express();
 const port = 3000;
 
 // Exit if the API token is not configured
-if (!process.env.BEE_API_TOKEN) {
-    console.error('FATAL ERROR: BEE_API_TOKEN is not defined. Please create a .env file with your token.');
-    process.exit(1);
-}
+// if (!process.env.BEE_API_TOKEN) {
+//     console.error('FATAL ERROR: BEE_API_TOKEN is not defined. Please create a .env file with your token.');
+//     process.exit(1);
+// }
 
 // Serve static files (HTML, CSS, JS) from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json()); // Add this line to parse JSON bodies
 
+
+const testApiRouter = require('./routes/testApi');
+
+app.use('/test-api', testApiRouter);
 
 // --- Page Routes ---
 
@@ -99,6 +103,17 @@ app.delete('/api/todos/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting todo:', error);
         res.status(500).json({ message: 'Failed to delete todo.' });
+    }
+});
+
+// Endpoint to update a todo
+app.put('/api/todos/:id', async (req, res) => {
+    try {
+        await beeService.updateTodo(req.params.id, req.body.text);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error updating todo:', error);
+        res.status(500).json({ message: 'Failed to update todo.' });
     }
 });
 

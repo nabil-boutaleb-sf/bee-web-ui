@@ -4,25 +4,6 @@
 
 This document outlines the recent changes made to the Bee Web UI application.
 
-### Summary of Changes
-
-- **Fact Management Improvements:**
-    - **Edit Button Styling:** The edit button on the facts page was disappearing on hover due to a CSS issue. This has been fixed by adding specific styles for the edit button, including a white icon on hover.
-    - **Edit Functionality:** The "edit fact" feature was not working due to two issues:
-        1.  The server was not parsing the JSON body of the request, which has been fixed by adding the `express.json()` middleware.
-        2.  The front-end was not correctly handling the edit and save process. The `editFact` function in `app.js` has been rewritten to provide a more robust and user-friendly editing experience.
-    - **Edit Field Size:** The input field for editing a fact was small. It has been enlarged for better usability.
-- **Todos Page Overhaul:**
-    - **Pagination:** The todos page now features a pagination system, similar to the one on the facts page, to handle a large number of todos.
-    - **Separated Lists:** Todos are now separated into "Incomplete" and "Completed" lists for better organization and clarity.
-    - **Bug Fixes:** An "error loading todos" message was appearing due to incorrect handling of the API response. This has been resolved by updating the front-end to correctly parse the paginated todo data.
-- **General Bug Fixes & Enhancements:**
-    - **Conversations Page:** Fixed a bug that was preventing conversations from loading correctly by ensuring the front-end correctly processes the API response.
-    - **API Error Handling:** The error messages for API failures (e.g., failing to update a fact) were generic. The server-side error handling has been improved to provide more specific and helpful error messages to the front-end.
-    - **Environment and API Token:**
-        - Investigated and identified that the `BEE_API_TOKEN` was being injected as an environment secret, which is why removing the `.env` file did not disconnect the application from the API.
-        - Restored the `.env` file with the correct API token.
-
 ### Project History
 
 #### Initial Setup and Design (July 2, 2025)
@@ -61,3 +42,32 @@ This document outlines the recent changes made to the Bee Web UI application.
     - Adding pagination to handle a large number of facts.
     - **Refined Facts Display**: Implemented separate API calls for confirmed and unconfirmed facts to ensure accurate display and movement between lists upon confirmation. The UI now correctly separates and displays confirmed and unconfirmed facts, each with its own pagination and loading indicators.
 - **Documentation Updates**: Updated `DESIGN.md`, `TASKS.md`, and `test_cases.md` to reflect the new fact editing feature, the refined facts page display, and the `Gemini.md` research task.
+
+#### Further Development (July 7, 2025)
+
+- **Fact Management Improvements:**
+    - **Edit Button Styling:** The edit button on the facts page was disappearing on hover due to a CSS issue. This has been fixed by adding specific styles for the edit button, including a white icon on hover.
+    - **Edit Functionality:** The "edit fact" feature was not working due to two issues:
+        1.  The server was not parsing the JSON body of the request, which has been fixed by adding the `express.json()` middleware.
+        2.  The front-end was not correctly handling the edit and save process. The `editFact` function in `app.js` has been rewritten to provide a more robust and user-friendly editing experience.
+    - **Edit Field Size:** The input field for editing a fact was small. It has been enlarged for better usability.
+- **Todos Page Overhaul:**
+    - **Pagination:** The todos page now features a pagination system, similar to the one on the facts page, to handle a large number of todos.
+    - **Separated Lists:** Todos are now separated into "Incomplete" and "Completed" lists for better organization and clarity.
+    - **Bug Fixes:** An "error loading todos" message was appearing due to incorrect handling of the API response. This has been resolved by updating the front-end to correctly parse the paginated todo data.
+    - **Edit Functionality:** Added the ability to edit todos directly from the UI.
+- **Conversations Page:** Fixed a bug that was preventing conversations from loading correctly by ensuring the front-end correctly processes the API response.
+- **Test Page Enhancements:**
+    - Implemented an isolated test API router (`/test-api`) that makes direct calls to the Bee API, bypassing the main SDK service.
+    - Updated `public/test.js` to use this new isolated API endpoint.
+    - Added "Confirmed" and "Unconfirmed" sections to the test page.
+    - Added breadcrumbs for navigation on the test page.
+- **General Bug Fixes & Enhancements:**
+    - **API Error Handling:** The error messages for API failures (e.g., failing to update a fact) were generic. The server-side error handling has been improved to provide more specific and helpful error messages to the front-end.
+    - **Environment and API Token:**
+        - Investigated and identified that the `BEE_API_TOKEN` was being injected as an environment variable, which is why removing the `.env` file did not disconnect the application from the API.
+        - Restored the `.env` file with the correct API token.
+        - Modified `index.js` to allow the server to start gracefully even if `BEE_API_TOKEN` is not defined, displaying a "not connected" message in the UI instead of crashing.
+    - **Code Cleanup:** Removed redundant and verbose logging from `services/beeService.js`.
+    - **File Organization:** Moved `CHANGELOG.md` and `bee api screenshots` directory into the `docs` folder.
+    - **Documentation Updates:** Updated `TASKS.md`, `README.md`, `DESIGN.md`, `GEMINI.md`, and `test_cases.md` to reflect current project status and future plans.

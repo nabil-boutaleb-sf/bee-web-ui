@@ -1,138 +1,56 @@
 # Bee Web UI - Design Document
 
-## 1. Overview
+This document outlines the design and architecture of the Bee Web UI application.
 
-The official `bee.computer` application has a user interface that makes it difficult to manage generated data, specifically "todos", "facts", and "conversations". It is often not possible to remove or edit these items.
+## 1. Project Goal
 
-This project aims to build a simple, personal-use web application that acts as an alternative UI. It will directly leverage the `bee.computer` API to provide a clean and functional interface for managing this data. This document outlines the design and architecture for this proof-of-concept application.
+The primary goal of this project is to create a simple, personal-use web application to manage "todos" and "facts" from the `bee.computer` API. The official UI makes it difficult to edit or delete these items, and this project aims to solve that problem.
 
-## 2. Goals & Scope
+## 2. Architecture
 
-The primary goal is to create a functional proof-of-concept that solves the immediate problem of being unable to edit/delete todos, facts, and conversations.
+The application follows a client-server architecture:
 
-### In-Scope (MVP)
+-   **Backend:** A Node.js server using the Express framework. Its primary responsibilities are:
+    -   Serving the static frontend assets (HTML, CSS, JavaScript).
+    -   Acting as a secure proxy for the Bee API. It uses the `beeai` npm package to handle all API interactions, keeping the `BEE_API_TOKEN` secure on the server.
+    -   Providing a separate, isolated API endpoint for the test page that makes direct calls to the Bee API.
+-   **Frontend:** A multi-page application built with vanilla HTML, CSS, and JavaScript. The frontend makes API calls to the backend, which then communicates with the Bee API.
 
--   **Authentication**: Securely store and use the personal `bee.computer` API token.
--   **Todos**:
-    -   View a list of all current todos on a dedicated page.
-    -   Mark a todo as complete.
-    -   Delete a todo.
--   **Facts**:
-    -   View a list of all recorded facts (both confirmed and unconfirmed) on a dedicated page.
-    -   Visually distinguish between confirmed and unconfirmed facts.
-    -   For unconfirmed facts, provide a "Confirm" icon button.
-    -   For confirmed facts, provide an "Unconfirm" icon button.
-    -   For all facts, provide an "Edit" button to modify the text.
-    -   For all facts, provide a "Delete" icon button.
--   **Conversations**:
-    -   View a list of all conversations on a dedicated page.
+## 3. UI Structure
 
-### Out-of-Scope (Future Enhancements)
+The application is divided into the following pages:
 
--   Creating new todos or facts.
--   Editing the text content of existing items.
--   Viewing daily summaries.
--   A user login system (the app is for personal use and will rely on a pre-configured API token).
--   Advanced filtering, sorting, or searching.
--   Confirmation dialogs for single deletions (to maintain a streamlined workflow).
+-   **/ (Home):** A welcome page that displays the connection status to the Bee API.
+-   **/todos:** Displays the user's todos, separated into "Incomplete" and "Completed" lists. Users can complete, edit, and delete todos.
+-   **/facts:** Displays the user's facts, separated into "Confirmed" and "Unconfirmed" lists. Users can confirm, unconfirm, edit, and delete facts.
+-   **/conversations:** Displays a list of the user's conversations.
+-   **/test.html:** A dedicated test page for direct interaction with the Bee API.
 
-## 3. Technical Architecture
+## 4. Key Features
 
-The application will use a simple client-server architecture to ensure the API token remains secure.
+-   **Facts Management:**
+    -   View confirmed and unconfirmed facts in separate, paginated lists.
+    -   Confirm, unconfirm, edit, and delete facts.
+-   **Todos Management:**
+    -   View incomplete and completed todos in separate, paginated lists.
+    -   Complete, edit, and delete todos.
+-   **Conversations:**
+    -   View a list of conversations.
+-   **Authentication:**
+    -   The application uses a single `BEE_API_TOKEN` stored in a `.env` file on the server.
+    -   The UI displays the connection status to the Bee API.
+-   **Testing:**
+    -   An isolated test page allows for direct API calls to the Bee API, bypassing the SDK for testing and debugging.
 
-### Backend
+## 5. Future Enhancements
 
--   **Framework**: Node.js with Express.
--   **Role**:
-    1.  **API Proxy**: The backend will be the only component that communicates directly with the `bee.computer` API (`https://api.bee.computer/v1/...`). This prevents the API token from being exposed to the user's browser.
-    2.  **Static Server**: It will serve the frontend HTML, CSS, and JavaScript files to the browser.
-
-### Frontend
-
--   **Technology**: Plain HTML, CSS, and vanilla JavaScript. A complex framework like React or Vue is unnecessary for this proof-of-concept.
--   **Role**: The frontend will provide the user interface. It will make requests to our *own* backend, which will then proxy those requests to the Bee API.
-
-### API Endpoints (Our Application)
-
-The Express server will expose the following endpoints for the frontend to consume:
-
--   `GET /`: Serves the main `index.html` landing page.
--   `GET /todos`: Serves the `todos.html` page.
--   `GET /facts`: Serves the `facts.html` page.
--   `GET /conversations`: Serves the `conversations.html` page.
--   `GET /api/auth/status`: Checks if the backend is properly authenticated with the Bee API.
--   `GET /api/todos`: Fetches the list of todos from the Bee API.
--   `PUT /api/todos/:id/complete`: Marks a todo as complete.
--   `DELETE /api/todos/:id`: Deletes a todo.
--   `GET /api/facts`: Fetches the list of facts from the Bee API.
--   `DELETE /api/facts/:id`: Deletes a fact.
--   `PUT /api/facts/:id/confirm`: Confirms a fact.
--   `PUT /api/facts/:id/unconfirm`: Unconfirms a fact.
--   `PUT /api/facts/:id`: Updates a fact's text.
--   `GET /api/conversations`: Fetches the list of conversations from the Bee API.
-
-## 4. Data & Security
-
--   The `bee.computer` API token is the primary secret.
--   It will be stored in a `.env` file in the project root.
--   This file will be loaded by the Node.js application at startup.
--   The `.env` file will be added to `.gitignore` to prevent it from being committed to version control.
-
-**Example `.env` file:**
-
-```
-BEE_API_TOKEN="your_bearer_token_here"
-BEE_API_BASE_URL="https://api.bee.computer/v1"
-```
-
-## 5. UI/UX Concept
-
-The user interface will be a clean, multi-page application.
-
--   **Home Page (`/`)**: A simple landing page that confirms the application is running and the Bee API token is configured correctly. It will provide navigation links to the "Todos", "Facts", and "Conversations" pages.
--   **Todos Page (`/todos`)**:
-    -   Displays a list of pending and completed todos.
-    -   Each todo item will have a "Complete" button and a "Delete" button.
-    -   Completed todos will be visually distinguished (e.g., grayed out with a line-through).
--   **Facts Page (`/facts`)**:
-    -   The Facts page will be divided into two main sections: "Confirmed Facts" and "Unconfirmed Facts".
-    -   Each section will display its respective list of facts with independent pagination controls, including page numbers (e.g., "Page 1 of X").
-    -   Unconfirmed facts will be visually distinguished from confirmed facts (e.g., different background color or an icon).
-    -   Each fact item will have action buttons on the right edge.
-    -   Unconfirmed facts will have "Confirm" and "Delete" icon buttons.
-    -   Confirmed facts will have "Unconfirm" and "Delete" icon buttons.
-    -   Full text of the fact will be displayed.
-    -   Loading indicators will be displayed for each section while facts are being fetched.
--   **Conversations Page (`/conversations`)**:
-    -   Displays a list of conversations.
-    -   Each conversation item will show a summary.
-    -   Loading indicators will be displayed while conversations are being fetched.
-
-### User Experience Elements
-
--   **Loading State**: When fetching data (e.g., loading the todo list), a clear loading indicator (e.g., "Loading...") will be displayed to inform the user.
--   **Error Handling**: If an API call fails, a simple, non-intrusive notification will appear on the screen to inform the user of the error (e.g., "Failed to delete fact.").
-
-## 6. Proposed Project Structure
-
-```
-/bee-web-ui
-├── .devcontainer/
-├── bee/                  # API documentation
-├── public/
-│   ├── index.html        # Main landing page
-│   ├── todos.html        # Page for managing todos
-│   ├── facts.html        # Page for managing facts
-│   ├── conversations.html # Page for managing conversations
-│   ├── style.css         # Shared styles for the UI
-│   └── app.js            # Frontend JavaScript logic
-├── services/
-│   └── beeService.js     # Module for Bee API communication
-├── .env                  # For storing API token (will be gitignored)
-├── .gitignore
-├── DESIGN.md             # This document
-├── Dockerfile
-├── index.js              # Express server entry point
-├── package.json
-└── package-lock.json
-```
+-   **Conversations Page:**
+    -   Display conversation metadata (e.g., date, number of messages).
+    -   Allow users to view the full content of a conversation.
+    -   Implement a search or filter for conversations.
+-   **General UI/UX:**
+    -   Add an inline creation form for new items (facts, todos).
+    -   Implement a search/filter for items on all pages.
+    -   Implement bulk actions (e.g., delete, confirm).
+    -   Display date/source information for items (if available from the API).
+    -   Improve the visual design and branding.

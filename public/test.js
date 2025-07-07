@@ -1,19 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const factsContainer = document.getElementById('facts-container');
+    const confirmedFactsContainer = document.getElementById('confirmed-facts-container');
+    const unconfirmedFactsContainer = document.getElementById('unconfirmed-facts-container');
 
-    async function loadFacts() {
+    async function loadFacts(confirmed, container) {
         try {
-            const response = await fetch('/api/facts');
+            // The 'confirmed' parameter is a boolean, so we don't need to check if it's true or false
+            const response = await fetch(`/test-api/facts?confirmed=${confirmed}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const facts = await response.json();
+            const data = await response.json();
+            const facts = data.facts;
 
             // Clear the loading message
-            factsContainer.innerHTML = '';
+            container.innerHTML = '';
 
             if (facts.length === 0) {
-                factsContainer.innerHTML = '<p>No facts found.</p>';
+                container.innerHTML = `<p>No ${confirmed ? 'confirmed' : 'unconfirmed'} facts found.</p>`;
                 return;
             }
 
@@ -23,12 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.textContent = fact.text;
                 ul.appendChild(li);
             });
-            factsContainer.appendChild(ul);
+            container.appendChild(ul);
         } catch (error) {
-            console.error('Failed to load facts:', error);
-            factsContainer.innerHTML = '<p>Error loading facts. Check the console for details.</p>';
+            console.error(`Failed to load ${confirmed ? 'confirmed' : 'unconfirmed'} facts:`, error);
+            container.innerHTML = `<p>Error loading facts: ${error.message}.</p>`;
         }
     }
 
-    loadFacts();
+    loadFacts(true, confirmedFactsContainer);
+    loadFacts(false, unconfirmedFactsContainer);
 });

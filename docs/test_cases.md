@@ -1,140 +1,79 @@
-# Test Cases, User Cases, and User Stories for Bee Web UI
+# Test Cases and User Stories
+
+This document outlines the user stories and test cases for the Bee Web UI application.
 
 ## User Stories
 
-*   **As a user, I want to see the connection status to the Bee API on the home page so I know if the application is functional.**
-    *   **Acceptance Criteria:**
-        *   When I load the home page, I see "status: connected to bee api" if the connection is successful.
-        *   When I load the home page, I see an error message if the connection fails.
-*   **As a user, I want to view my list of todos so I can keep track of my tasks.**
-    *   **Acceptance Criteria:**
-        *   When I navigate to the Todos page, I see a list of my todos.
-        *   While the todos are loading, I see a "loading" indicator.
-        *   If there's an error fetching todos, I see an error message.
-*   **As a user, I want to mark a todo as complete so I can track my progress.**
-    *   **Acceptance Criteria:**
-        *   On the Todos page, each todo has a "Complete" button.
-        *   When I click "Complete" on a todo, it is marked as complete (e.g., visually struck through or moved to a "completed" section).
-        *   The change is persisted.
-*   **As a user, I want to delete a todo so I can remove irrelevant tasks.**
-    *   **Acceptance Criteria:**
-        *   On the Todos page, each todo has a "Delete" button.
-        *   When I click "Delete" on a todo, it is removed from the list.
-        *   The change is persisted.
-*   **As a user, I want to view my list of facts so I can access important information.**
-    *   **Acceptance Criteria:**
-        *   When I navigate to the Facts page, I see a list of my facts.
-        *   While the facts are loading, I see a "loading" indicator.
-        *   If there's an error fetching facts, I see an error message.
-*   **As a user, I want to delete a fact so I can remove outdated information.**
-    *   **Acceptance Criteria:**
-        *   On the Facts page, each fact has a "Delete" button.
-        *   When I click "Delete" on a fact, it is removed from the list.
-        *   The change is persisted.
-*   **As a developer, I want a working test page so I can verify core functionalities independently.**
-    *   **Acceptance Criteria:**
-        *   When I navigate to the Test page, I see the expected test interface.
-        *   The tests can be run and provide clear results.
+-   **As a user, I want to see the connection status to the Bee API on the home page so I know if the application is functional.**
+-   **As a user, I want to view my todos, separated by their status (incomplete, complete), so I can easily track my tasks.**
+-   **As a user, I want to mark a todo as complete so I can track my progress.**
+-   **As a user, I want to edit the text of a todo to correct mistakes or update details.**
+-   **As a user, I want to delete a todo to remove irrelevant tasks.**
+-   **As a user, I want to view my facts, separated by their status (unconfirmed, confirmed), so I can manage my information.**
+-   **As a user, I want to confirm an unconfirmed fact to validate its accuracy.**
+-   **As a user, I want to unconfirm a confirmed fact if it's no longer valid.**
+-   **As a user, I want to edit the text of a fact to correct or update it.**
+-   **As a user, I want to delete a fact to remove outdated information.**
+-   **As a user, I want to navigate through long lists of todos and facts using pagination.**
+-   **As a developer, I want an independent test page to verify direct Bee API calls without using the app's main SDK service.**
 
 ## Test Cases
 
-### Connection Status Validation
+### Home Page
 
-*   **Test Case 1.1: Successful Connection Display**
-    *   **Precondition:** Bee API is accessible and returns a successful status.
-    *   **Action:** Load `index.html`.
-    *   **Expected Result:** The text "status: connected to bee api" is visible on the page.
-*   **Test Case 1.2: Failed Connection Display**
-    *   **Precondition:** Bee API is inaccessible or returns an error status.
-    *   **Action:** Load `index.html`.
-    *   **Expected Result:** An appropriate error message (e.g., "status: connection failed") is displayed instead of the success message.
+*   **Test Case 1.1: Successful Connection**
+    *   **Precondition:** The backend server is running and can connect to the Bee API.
+    *   **Action:** Load the home page (`/`).
+    *   **Expected Result:** The text "Status: Connected to Bee API" is visible in green.
+*   **Test Case 1.2: Failed Connection**
+    *   **Precondition:** The backend server is running but cannot connect to the Bee API (e.g., invalid token).
+    *   **Action:** Load the home page (`/`).
+    *   **Expected Result:** The text "Status: Not connected to Bee API. Check your token." is visible in red.
 
-### Todos Page Functionality
+### Todos Page
 
-*   **Test Case 2.1: Todos Loading State**
-    *   **Precondition:** Todos API endpoint is slow to respond.
-    *   **Action:** Navigate to `todos.html`.
-    *   **Expected Result:** A "loading" indicator is displayed before the todos list appears.
-*   **Test Case 2.2: Todos Display**
-    *   **Precondition:** Todos API endpoint returns a list of todos.
-    *   **Action:** Navigate to `todos.html`.
-    *   **Expected Result:** All todos returned by the API are displayed correctly on the page.
-*   **Test Case 2.3: Mark Todo as Complete**
-    *   **Precondition:** A todo exists on the Todos page.
-    *   **Action:** Click the "Complete" button for a specific todo.
-    *   **Expected Result:** The todo's visual state changes (e.g., strikethrough), and a successful API call to mark as complete is made.
-*   **Test Case 2.4: Delete Todo**
-    *   **Precondition:** A todo exists on the Todos page.
-    *   **Action:** Click the "Delete" button for a specific todo.
-    *   **Expected Result:** The todo is removed from the displayed list, and a successful API call to delete the todo is made.
+*   **Test Case 2.1: View Todos**
+    *   **Action:** Navigate to the Todos page.
+    *   **Expected Result:** The page displays two sections: "Incomplete Todos" and "Completed Todos", each with a list of the corresponding todos. A loading message appears first.
+*   **Test Case 2.2: Complete a Todo**
+    *   **Action:** Click the "Complete" button on an incomplete todo.
+    *   **Expected Result:** The todo disappears from the "Incomplete" list and reappears in the "Completed" list.
+*   **Test Case 2.3: Edit a Todo**
+    *   **Action:** Click the "Edit" button on an incomplete todo, change the text in the input field, and click "Save".
+    *   **Expected Result:** The todo's text is updated in the "Incomplete" list.
+*   **Test Case 2.4: Delete a Todo**
+    *   **Action:** Click the "Delete" button on any todo.
+    *   **Expected Result:** The todo is permanently removed from the list.
+*   **Test Case 2.5: Pagination**
+    *   **Action:** Click the "Next" and "Previous" buttons below the todo lists.
+    *   **Expected Result:** The list of todos updates to show the next or previous page of results.
 
-### Facts Page Functionality
+### Facts Page
 
-*   **Test Case 3.1: Facts Loading State**
-    *   **Precondition:** Facts API endpoint is slow to respond.
-    *   **Action:** Navigate to `facts.html`.
-    *   **Expected Result:** A "loading" indicator is displayed before the facts list appears.
-*   **Test Case 3.2: Facts Display**
-    *   **Precondition:** Facts API endpoint returns a list of facts.
-    *   **Action:** Navigate to `facts.html`.
-    *   **Expected Result:** All facts returned by the API are displayed correctly on the page.
-*   **Test Case 3.3: Delete Fact**
-    *   **Precondition:** A fact exists on the Facts page.
-    *   **Action:** Click the "Delete" button for a specific fact.
-    *   **Expected Result:** The fact is removed from the displayed list, and a successful API call to delete the fact is made.
+*   **Test Case 3.1: View Facts**
+    *   **Action:** Navigate to the Facts page.
+    *   **Expected Result:** The page displays two sections: "Confirmed Facts" and "Unconfirmed Facts", each with a list of the corresponding facts.
+*   **Test Case 3.2: Confirm a Fact**
+    *   **Action:** Click the "Confirm" button on an unconfirmed fact.
+    *   **Expected Result:** The fact moves from the "Unconfirmed" list to the "Confirmed" list.
+*   **Test Case 3.3: Unconfirm a Fact**
+    *   **Action:** Click the "Unconfirm" button on a confirmed fact.
+    *   **Expected Result:** The fact moves from the "Confirmed" list to the "Unconfirmed" list.
+*   **Test Case 3.4: Edit a Fact**
+    *   **Action:** Click the "Edit" button on any fact, change the text, and click "Save".
+    *   **Expected Result:** The fact's text is updated in its list.
+*   **Test Case 3.5: Delete a Fact**
+    *   **Action:** Click the "Delete" button on any fact.
+    *   **Expected Result:** The fact is permanently removed from the list.
+*   **Test Case 3.6: Pagination**
+    *   **Action:** Click the "Next" and "Previous" buttons below the fact lists.
+    *   **Expected Result:** The list of facts updates to show the next or previous page of results.
 
-### Test Page Restoration
+### Test Page (Independent API)
 
-*   **Test Case 4.1: Test Page Accessibility**
-    *   **Precondition:** `test.html` and `test.js` are restored.
-    *   **Action:** Navigate to `test.html`.
-    *   **Expected Result:** The test page loads without errors and its UI elements are functional.
-*   **Test Case 4.2: Original Test.js Preservation**
-    *   **Precondition:** `test.js` is modified for the new setup.
-    *   **Action:** Verify the existence of `public/test.original.js`.
-    *   **Expected Result:** `public/test.original.js` exists and contains the original content of `test.js` before modifications related to the SDK integration.
-
-## User Cases
-
-### User Case 1: Checking API Connection
-
-1.  User opens the application in their web browser.
-2.  The `index.html` page loads.
-3.  The application makes a request to `/api/auth/status`.
-4.  If the API returns a success, "status: connected to bee api" is displayed.
-5.  If the API returns an error, an error message is displayed.
-
-### User Case 2: Managing Todos
-
-1.  User navigates to the Todos page (`todos.html`).
-2.  The application fetches todos from `/api/todos`.
-3.  While fetching, a loading indicator is shown.
-4.  Upon successful retrieval, the todos are displayed.
-5.  User clicks "Complete" on a todo.
-6.  The application sends a `PUT` request to `/api/todos/:id/complete`.
-7.  The todo's status is updated visually.
-8.  User clicks "Delete" on a todo.
-9.  The application sends a `DELETE` request to `/api/todos/:id`.
-10. The todo is removed from the display.
-
-### User Case 3: Managing Facts
-
-1.  User navigates to the Facts page (`facts.html`).
-2.  The application makes separate requests to `/api/facts?confirmed=true` and `/api/facts?confirmed=false`.
-3.  While fetching, loading indicators are shown for each section.
-4.  Upon successful retrieval, confirmed facts are displayed in the "Confirmed Facts" section, and unconfirmed facts are displayed in the "Unconfirmed Facts" section.
-5.  User clicks "Confirm" on an unconfirmed fact.
-6.  The application sends a `PUT` request to `/api/facts/:id/confirm`.
-7.  Both fact lists are reloaded, and the fact moves from the "Unconfirmed Facts" section to the "Confirmed Facts" section.
-8.  User clicks "Delete" on a fact.
-9.  The application sends a `DELETE` request to `/api/facts/:id`.
-10. Both fact lists are reloaded, and the fact is removed from the display.
-11. User navigates through pagination using "Next" and "Previous" buttons for either list.
-
-### User Case 4: Using the Test Page
-
-1.  Developer navigates to the Test page (`test.html`).
-2.  The page loads, displaying test controls and results area.
-3.  Developer initiates tests.
-4.  Test results are displayed on the page.
-5.  The original `test.js` functionality is available for reference in `public/test.original.js`.
+*   **Test Case 4.1: View Facts**
+    *   **Action:** Navigate to the Test page (`/test.html`).
+    *   **Expected Result:** The page makes a direct call to the Bee API (via the `/test-api` proxy) and displays "Confirmed Facts" and "Unconfirmed Facts" in their respective sections.
+*   **Test Case 4.2: Breadcrumb Navigation**
+    *   **Action:** Click the "Home" link in the breadcrumb navigation.
+    *   **Expected Result:** The user is navigated back to the home page.

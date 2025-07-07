@@ -2,16 +2,6 @@ const Bee = require('beeai');
 
 const bee = new Bee({ apiKey: process.env.BEE_API_TOKEN });
 
-async function getFacts(confirmed, page = 1, limit = 10) {
-  try {
-    const facts = await bee.getFacts('me', { confirmed, page, limit });
-    return facts;
-  } catch (error) {
-    console.error('Error fetching facts from Bee AI SDK:', error.message);
-    throw new Error('Failed to fetch facts from Bee AI SDK.');
-  }
-}
-
 async function deleteFact(factId) {
   try {
     await bee.deleteFact('me', factId);
@@ -43,26 +33,20 @@ async function getTodos(page = 1, limit = 10) {
 async function checkAuthStatus() {
   try {
     // Attempt to fetch facts as a way to verify authentication
-    console.log('Attempting to check authentication status...');
     await bee.getFacts('me'); 
-    console.log('Authentication check successful.');
     return true;
   } catch (error) {
     console.error('Authentication check failed with Bee AI SDK:', error.message);
-    console.error('Full error object:', error);
     return false;
   }
 }
 
 async function getFacts(confirmed, page = 1, limit = 10) {
   try {
-    console.log(`Fetching facts with confirmed=${confirmed}, page=${page}, limit=${limit}`);
     const facts = await bee.getFacts('me', { confirmed, page, limit });
-    console.log('Facts fetched successfully:', facts);
     return facts;
   } catch (error) {
     console.error('Error fetching facts from Bee AI SDK:', error.message);
-    console.error('Full error object:', error);
     throw new Error('Failed to fetch facts from Bee AI SDK.');
   }
 }
@@ -83,6 +67,15 @@ async function deleteTodo(todoId) {
     console.error(`Error deleting todo ${todoId} from Bee AI SDK:`, error.message);
     throw new Error('Failed to delete todo from Bee AI SDK.');
   }
+}
+
+async function updateTodo(todoId, text) {
+    try {
+        await bee.updateTodo('me', todoId, { text });
+    } catch (error) {
+        console.error(`Error updating todo ${todoId} from Bee AI SDK:`, error.message);
+        throw new Error('Failed to update todo from Bee AI SDK.');
+    }
 }
 
 async function unconfirmFact(factId) {
@@ -123,5 +116,6 @@ module.exports = {
   deleteTodo,
   unconfirmFact,
   updateFact,
-  getConversations
+  getConversations,
+  updateTodo
 };

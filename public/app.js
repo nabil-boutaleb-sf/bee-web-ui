@@ -47,6 +47,7 @@ const todosLimit = 10;
 async function loadTodos() {
     const incompleteTodosList = document.getElementById('incomplete-todos-list');
     const completedTodosList = document.getElementById('completed-todos-list');
+    const todosContainer = document.getElementById('todos-container');
 
     try {
         const response = await fetch(`/api/todos?page=${currentPageTodos}&limit=${todosLimit}`);
@@ -54,7 +55,7 @@ async function loadTodos() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        const todos = data.todos; // Correctly access the todos array
+        const todos = data.todos;
 
         incompleteTodosList.innerHTML = '';
         completedTodosList.innerHTML = '';
@@ -79,6 +80,12 @@ async function loadTodos() {
                 completeButton.classList.add('icon-btn', 'confirm-btn');
                 completeButton.onclick = () => completeTodo(todo.id);
                 buttonContainer.appendChild(completeButton);
+
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                editButton.classList.add('icon-btn', 'edit-btn');
+                editButton.onclick = () => editTodo(li, todo.id, todo.text);
+                buttonContainer.appendChild(editButton);
 
                 const deleteButton = document.createElement('button');
                 deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
@@ -118,7 +125,11 @@ async function loadTodos() {
         }
 
         // Pagination for todos
-        const paginationContainer = document.createElement('div');
+        let paginationContainer = todosContainer.querySelector('.pagination-container');
+        if (paginationContainer) {
+            paginationContainer.remove();
+        }
+        paginationContainer = document.createElement('div');
         paginationContainer.classList.add('pagination-container');
 
         const prevButton = document.createElement('button');
@@ -143,7 +154,6 @@ async function loadTodos() {
         };
         paginationContainer.appendChild(nextButton);
 
-        const todosContainer = document.getElementById('todos-container');
         todosContainer.appendChild(paginationContainer);
 
     } catch (error) {
@@ -178,6 +188,79 @@ async function deleteTodo(todoId) {
     } catch (error) {
         console.error('Error deleting todo:', error);
         alert('Error deleting todo.');
+    }
+}
+
+function editTodo(li, todoId, currentText) {
+    const originalContent = li.innerHTML; // Save the original content
+    li.innerHTML = ''; // Clear the list item
+
+    const form = document.createElement('form');
+    form.classList.add('edit-fact-form'); // Re-use the same style as facts
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        updateTodo(todoId, input.value);
+    };
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentText;
+    input.classList.add('edit-fact-input');
+    form.appendChild(input);
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('button-container');
+
+    const saveButton = document.createElement('button');
+    saveButton.innerHTML = '<i class="fas fa-save"></i>';
+    saveButton.type = 'submit';
+    saveButton.classList.add('icon-btn', 'confirm-btn');
+    buttonContainer.appendChild(saveButton);
+
+    const cancelButton = document.createElement('button');
+    cancelButton.innerHTML = '<i class="fas fa-times"></i>';
+    cancelButton.type = 'button';
+    cancelButton.classList.add('icon-btn', 'delete-btn');
+    cancelButton.onclick = () => {
+        li.innerHTML = originalContent; // Restore original content
+        // Re-attach event listeners
+        const editButton = li.querySelector('.edit-btn');
+        if (editButton) {
+            editButton.onclick = () => editTodo(li, todoId, currentText);
+        }
+        const deleteButton = li.querySelector('.delete-btn');
+        if (deleteButton) {
+            deleteButton.onclick = () => deleteTodo(todoId);
+        }
+        const completeButton = li.querySelector('.confirm-btn');
+        if (completeButton) {
+            completeButton.onclick = () => completeTodo(todoId);
+        }
+    };
+    buttonContainer.appendChild(cancelButton);
+
+    form.appendChild(buttonContainer);
+    li.appendChild(form);
+    input.focus();
+}
+
+async function updateTodo(todoId, text) {
+    try {
+        const response = await fetch(`/api/todos/${todoId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text })
+        });
+        if (response.ok) {
+            loadTodos();
+        } else {
+            alert('Failed to update todo.');
+        }
+    } catch (error) {
+        console.error('Error updating todo:', error);
+        alert('Error updating todo.');
     }
 }
 

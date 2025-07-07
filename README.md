@@ -1,36 +1,47 @@
 # Bee Web UI
 
-A simple web UI to interact with the [bee.computer](https://bee.computer/) API.
+A simple web UI to interact with the [bee.computer](https://bee.computer/) API. This application provides a user-friendly interface for managing your personal "todos" and "facts".
 
-## Development Environment
+## Features
 
-It is highly recommended to use [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) for development. This will ensure a consistent and pre-configured environment.
+-   **View and Manage Facts:** See your confirmed and unconfirmed facts, with options to confirm, unconfirm, edit, and delete them.
+-   **View and Manage Todos:** See your incomplete and completed todos, with options to complete, edit, and delete them.
+-   **View Conversations:** See a list of your conversations.
+-   **Secure API Interaction:** The application uses a Node.js backend to securely handle API requests, so your `BEE_API_TOKEN` is never exposed to the browser.
+-   **Isolated Test Page:** A dedicated test page allows for direct interaction with the Bee API for testing and debugging purposes.
 
-When you open this project in VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed, it will automatically:
+## Getting Started
 
-*   Build the Docker container defined in the `Dockerfile`.
-*   Install necessary system-level dependencies (like the GitHub CLI).
-*   Install the following recommended VS Code extensions inside the container:
-    *   [Gemini Code Assist](https://marketplace.visualstudio.com/items?itemName=google.geminicodeassist)
-    *   [Todo Tree](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree)
-    *   [PDF Viewer](https://marketplace.visualstudio.com/items?itemName=brave.vscode-pdf)
+### Prerequisites
 
-## Setup
+-   [Node.js](https://nodejs.org/) (v20 or later)
+-   An API token from [bee.computer](https://bee.computer/)
 
-1.  **Install dependencies:**
+### Installation and Setup
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/nabil-boutaleb-sf/bee-web-ui.git
+    cd bee-web-ui
+    ```
+
+2.  **Install dependencies:**
     ```bash
     npm install
     ```
 
-2.  **Create a `.env` file:**
+3.  **Create a `.env` file:**
     Create a file named `.env` in the root of the project and add your Bee API token:
     ```
-    BEE_API_TOKEN="your_bee_api_token_here"
+    BEE_API_TOKEN="your-api-token-here"
     ```
 
-3.  **Start the server:**
-    ```bash
-    npm start
-    ```
+### Running the Application
 
-The server will be running at `http://localhost:3000`.
+To start the application, run the following command:
+
+```bash
+npm start
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
