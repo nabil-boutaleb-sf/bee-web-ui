@@ -71,3 +71,8 @@ This document outlines the recent changes made to the Bee Web UI application.
     - **Code Cleanup:** Removed redundant and verbose logging from `services/beeService.js`.
     - **File Organization:** Moved `CHANGELOG.md` and `bee api screenshots` directory into the `docs` folder.
     - **Documentation Updates:** Updated `TASKS.md`, `README.md`, `DESIGN.md`, `GEMINI.md`, and `test_cases.md` to reflect current project status and future plans.
+- **Suggested Todos Investigation:**
+    - Investigated the Bee.computer API and SDK for a "suggested" or "unconfirmed" parameter for todos, as observed in the mobile app.
+    - Confirmed that no such parameter is explicitly documented or discoverable via direct API calls.
+    - Decided to contact Bee.computer developers for clarification on how to access "suggested todos" via the API.
+

@@ -2,15 +2,17 @@
 
 This document outlines the development tasks for the Bee Web UI project.
 
-## High Priority
+## Blocked Tasks
 - [ ] **Todos Page:**
-    - [ ] Separate todos into three sections: "Unconfirmed", "Incomplete", and "Completed".
+    - [ ] Separate todos into three sections: "Unconfirmed", "Incomplete", and "Completed". (Blocked by Bee.computer API clarification on "suggested todos")
 
 ## Medium Priority
+- [x] **Investigate Suggested Todos API:** Contact Bee.computer developers to clarify how to access "suggested todos" via the API, as observed in the mobile app.
 - [ ] **Conversations Page:**
     - [ ] Display conversation metadata (e.g., date, number of messages).
     - [ ] Allow users to view the full content of a conversation.
     - [ ] Implement a search or filter for conversations.
+- [ ] **Integrate Markdown Reader/Editor Library:** Research and integrate a suitable Markdown parsing and editing library for improved content display and editing capabilities.
 
 ## Low Priority
 - [ ] **General UI/UX:**
