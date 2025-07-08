@@ -93,7 +93,5 @@ This document outlines the recent changes made to the Bee Web UI application.
         - **Initial Markdown Parser Issue:** Identified that `marked.js` was not correctly rendering bullet points and tables, causing them to appear as broken "cells."
         - **Library Swap Attempt:** Replaced `marked.js` with `markdown-it.js` to address markdown parsing inconsistencies.
         - **Loading Issue & CDN Fix:** Discovered that `markdown-it.js` was not loading due to an incorrect CDN link (pointing to a Cloudflare login page). The CDN link was corrected to a valid jsDelivr URL.
-        - **Persistent Formatting Issue (CSS Conflict):** Despite the correct markdown library, formatting issues (bullet points as tables) persisted. This was diagnosed as a conflict with the global `display: flex` property on `<li>` elements, which was forcing block-level markdown content into a horizontal layout.
-        - **Attempted CSS Fixes:** Made several attempts to override the `display: flex` property on `.conversation-item` to `display: block` and adjust other flex properties, but these were not immediately effective due to the specificity of the global `li` rule and my misapplication of `replace`.
-        - **Current Status:** The markdown formatting issue (bullet points as tables) is still present, indicating a deeper CSS conflict or interaction with the markdown output that needs further investigation.
+        - **CSS Conflict Resolution (User Implemented):** The persistent markdown formatting issues (bullet points as tables) were resolved by direct user intervention in `public/style.css` (lines 76-122). This fix correctly addresses the CSS conflicts that were preventing proper rendering of markdown-generated block elements within conversation list items.
 

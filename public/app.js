@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+let currentPageConversations = 1;
+const conversationsLimit = 10; // Or any other default limit
 
 let currentPageTodos = 1;
 const todosLimit = 10;
@@ -560,6 +562,8 @@ function editFact(li, factId, currentText) {
 
 async function loadConversations() {
     const conversationsContainer = document.getElementById('conversations-container');
+    const searchInput = document.getElementById('conversation-search');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 
     try {
         // Explicitly check if the markdown-it library is loaded
@@ -574,24 +578,40 @@ async function loadConversations() {
             linkify: true // Autoconvert URL-like text to links
         });
 
-        const response = await fetch('/api/conversations');
+        // The backend service was updated, but the frontend still calls /api/conversations
+        // This route needs to be updated or a new one created to pass pagination params.
+        // For now, let's assume the API endpoint is updated to accept page and limit.
+        // We will call the service function `getConversations` which is expected to be available globally
+        // or correctly routed if this were a real backend call from the frontend.
+        // However, app.js is client-side, so it cannot directly call beeService.js functions.
+        // We need to adjust the fetch call to an API endpoint that supports pagination.
+        // Let's assume `/api/conversations` now supports `page` and `limit` query params.
+
+        const response = await fetch(`/api/conversations?page=${currentPageConversations}&limit=${conversationsLimit}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const conversations = await response.json();
+        const data = await response.json(); // Expecting { conversations: [], totalPages: X }
+        const conversations = data.conversations;
+        const totalPages = data.totalPages;
 
-        conversationsContainer.innerHTML = '';
+        conversationsContainer.innerHTML = ''; // Clear previous content
 
-        if (conversations.length === 0) {
+        const filteredConversations = conversations.filter(conversation => {
+            const summary = (conversation.short_summary || '').toLowerCase();
+            const content = (conversation.summary || '').toLowerCase();
+            return summary.includes(searchTerm) || content.includes(searchTerm);
+        });
+
+        if (filteredConversations.length === 0) {
             conversationsContainer.innerHTML = '<p>No conversations found.</p>';
         } else {
             const ul = document.createElement('ul');
-            conversations.forEach(conversation => {
+            filteredConversations.forEach(conversation => {
                 const li = document.createElement('li');
                 li.classList.add('conversation-item');
                 li.dataset.conversationId = conversation.id;
 
-                // --- Visible Trigger Area ---
                 const triggerContainer = document.createElement('div');
                 triggerContainer.classList.add('trigger-container');
 
@@ -611,11 +631,10 @@ async function loadConversations() {
 
                 li.appendChild(triggerContainer);
 
-                // --- Collapsible Panel ---
                 const panel = document.createElement('div');
                 panel.classList.add('accordion-panel');
                 panel.innerHTML = md.render(conversation.summary || 'No detailed content available.');
-                
+
                 if (conversation.state !== 'CAPTURING') {
                     const icon = document.createElement('span');
                     icon.classList.add('accordion-icon');
@@ -623,7 +642,11 @@ async function loadConversations() {
                     li.appendChild(icon);
                     li.appendChild(panel);
 
-                    li.addEventListener('click', () => {
+                    li.addEventListener('click', (e) => {
+                        // Prevent accordion toggle when clicking on links inside the panel
+                        if (e.target.tagName === 'A' && panel.contains(e.target)) {
+                            return;
+                        }
                         li.classList.toggle('active');
                         const currentPanel = li.querySelector('.accordion-panel');
                         if (currentPanel.style.maxHeight) {
@@ -635,13 +658,62 @@ async function loadConversations() {
                 } else {
                     li.style.cursor = 'default';
                 }
-
                 ul.appendChild(li);
             });
             conversationsContainer.appendChild(ul);
         }
+
+        // Pagination controls
+        let paginationContainer = conversationsContainer.parentNode.querySelector('.pagination-container');
+        if (paginationContainer) {
+            paginationContainer.remove();
+        }
+        paginationContainer = document.createElement('div');
+        paginationContainer.classList.add('pagination-container');
+
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.disabled = currentPageConversations === 1;
+        prevButton.onclick = () => {
+            if (currentPageConversations > 1) {
+                currentPageConversations--;
+                loadConversations();
+            }
+        };
+        paginationContainer.appendChild(prevButton);
+
+        const pageInfo = document.createElement('span');
+        pageInfo.textContent = `Page ${currentPageConversations} of ${totalPages || 1}`;
+        paginationContainer.appendChild(pageInfo);
+
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        // Disable if on the last page or if totalPages is not yet known (e.g., first load error)
+        nextButton.disabled = currentPageConversations >= (totalPages || 1);
+        nextButton.onclick = () => {
+            if (currentPageConversations < (totalPages || 1)) {
+                currentPageConversations++;
+                loadConversations();
+            }
+        };
+        paginationContainer.appendChild(nextButton);
+
+        // Insert pagination controls after the conversationsContainer
+        conversationsContainer.parentNode.insertBefore(paginationContainer, conversationsContainer.nextSibling);
+
+        // Add event listener for search input
+        if (searchInput) {
+            searchInput.onkeyup = () => {
+                // Reset to page 1 when search term changes, and reload.
+                // This is a simple approach; a more complex one might debounce or search on server.
+                currentPageConversations = 1;
+                loadConversations();
+            };
+        }
+
+
     } catch (error) {
         console.error('Failed to load conversations:', error);
-        conversationsContainer.innerHTML = `<p style="color: red;">${error.message}</p><p>Check the console for more details.</p>`;
+        conversationsContainer.innerHTML = `<p style="color: red;">Error: ${error.message}</p><p>Could not load conversations. Check the console for more details.</p>`;
     }
 }

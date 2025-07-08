@@ -12,7 +12,7 @@ This document outlines the development tasks for the Bee Web UI project.
     - [x] Display conversation metadata (e.g., date, number of messages).
     - [x] Allow users to view the full content of a conversation.
     - [ ] Implement a search or filter for conversations.
-- [x] **Integrate Markdown Reader/Editor Library:** Research and integrate a suitable Markdown parsing and editing library for improved content display and editing capabilities.
+- [x] **Integrate Markdown Reader/Editor Library:** Integrated `markdown-it` and resolved CSS conflicts to correctly render markdown content (bullet points, bold text, tables) in conversations.
 
 ## Low Priority
 - [ ] **General UI/UX:**

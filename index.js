@@ -164,8 +164,13 @@ app.put('/api/facts/:id', async (req, res) => {
 // Endpoint to get conversations
 app.get('/api/conversations', async (req, res) => {
     try {
-        const conversations = await beeService.getConversations();
-        res.json(conversations);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const conversationsData = await beeService.getConversations(page, limit);
+        // The service now returns the whole object, which might be like { conversations: [], totalPages: X }
+        // Ensure this structure is what the frontend expects, or adapt here.
+        // Based on app.js, it expects { conversations: [], totalPages: X }
+        res.json(conversationsData);
     } catch (error) {
         console.error('Error fetching conversations:', error.message);
         res.status(500).json({ message: error.message });
