@@ -24,6 +24,13 @@ The project is built with a Node.js/Express backend that serves a vanilla HTML, 
 
 - **Graceful Failure:** The application should handle the absence of a `BEE_API_TOKEN` gracefully. The server should still start and the UI should display a "not connected" message, rather than crashing.
 - **Documentation:** The agent is responsible for keeping the project documentation (`CHANGELOG.md`, `TASKS.md`, `DESIGN.md`,`test_cases.md`, `README.md`, and this file) up-to-date.
+- **User Confidence:** When the user expresses confidence in a solution or direction, do not argue or question their judgment. Focus solely on following their instructions precisely.
+- **Commit Message Formatting:**
+    - Adhere to the 50/72 rule: The subject line (first line) must be 50 characters maximum. Body lines must be 72 characters maximum.
+    - Commit messages must NOT contain backticks (`) or any other characters that might interfere with shell parsing or display in various Git tools.
+- **Proactive Problem Solving:** Upon encountering failures or unexpected issues, prioritize independent problem-solving using available tools and context. Only involve the user after exhausting self-resolution attempts or when explicit user input/decision is absolutely necessary. Aim to provide actionable solutions or next steps for the agent, rather than immediately deferring to the user.
+    - **Tool/Environment Failures:** If a tool fails due to an environmental issue (e.g., missing authentication, uninstalled dependency), proactively guide the user on how to resolve that underlying issue so the agent can successfully execute the tool in the future, rather than asking the user to perform the task manually.
+    - **Git Command Failures:** If a git command fails, attempt to pull from the remote (e.g., `origin`) before re-attempting the command.
 
 ## Current Project Status
 
