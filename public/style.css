@@ -74,6 +74,53 @@ li:hover {
     box-shadow: none;
 }
 
+/* Styles for markdown-generated content within the accordion panel */
+.accordion-panel ul {
+    list-style: disc; /* Standard disc bullets */
+    padding-left: 20px; /* Indentation for the list */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.accordion-panel ol {
+    list-style: decimal; /* Standard numbered list */
+    padding-left: 20px; /* Indentation for the list */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.accordion-panel li {
+    display: list-item; /* Crucial for correct bullet/number rendering */
+    background-color: transparent; /* Remove any inherited background from global li */
+    border: none; /* Remove any inherited border */
+    padding: 0.2em 0; /* Minimal padding for list items */
+    margin-bottom: 0.3em; /* Spacing between list items */
+    /* Resetting properties that might be inherited from the global 'li' style */
+    justify-content: initial;
+    align-items: initial;
+}
+
+.accordion-panel li:hover {
+    box-shadow: none; /* Ensure no hover effect on markdown list items */
+    cursor: default;
+}
+
+.accordion-panel p {
+    margin-bottom: 0.5em;
+}
+
+.accordion-panel h1,
+.accordion-panel h2,
+.accordion-panel h3,
+.accordion-panel h4,
+.accordion-panel h5,
+.accordion-panel h6 {
+    margin-top: 0.8em;
+    margin-bottom: 0.4em;
+    border-bottom: none; /* Remove heading borders inherited from global h1 if any */
+    padding-bottom: 0;
+}
+
 
 .accordion-panel th, .accordion-panel td,
 .summary-preview th, .summary-preview td {

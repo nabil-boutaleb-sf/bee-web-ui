@@ -35,7 +35,7 @@ The application is divided into the following pages:
     -   View incomplete and completed todos in separate, paginated lists.
     -   Complete, edit, and delete todos.
 -   **Conversations:**
-    -   View a list of conversations.
+    -   View a list of conversations in an accordion format, with full markdown rendering (including lists and tables) for detailed content.
 -   **Authentication:**
     -   The application uses a single `BEE_API_TOKEN` stored in a `.env` file on the server.
     -   The UI displays the connection status to the Bee API.
