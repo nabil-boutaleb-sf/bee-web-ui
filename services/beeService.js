@@ -96,10 +96,11 @@ async function updateFact(factId, text) {
   }
 }
 
-async function getConversations() {
+async function getConversations(page = 1, limit = 10) {
   try {
-    const response = await bee.getConversations('me');
-    return response.conversations;
+    // Assuming the SDK supports pagination similar to getTodos and getFacts
+    const response = await bee.getConversations('me', { page, limit });
+    return response; // Return the whole response object
   } catch (error) {
     console.error('Error fetching conversations from Bee AI SDK:', error.message);
     throw new Error('Failed to fetch conversations from Bee AI SDK.');
