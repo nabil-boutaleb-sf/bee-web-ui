@@ -18,8 +18,15 @@ main {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
+/* Wider container for content-heavy pages */
+.main-wide {
+    max-width: calc(100% - 40px); /* Nearly full-width with 20px margin on each side */
+    margin: 2rem 20px;
+}
+
 /* Headings */
 h1 {
+
     font-size: 2.5rem;
     color: #1c1e21;
     border-bottom: 2px solid #e7e7e7;
@@ -47,6 +54,49 @@ li {
 
 li:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Remove hover effect for elements inside the accordion panel */
+.accordion-panel li:hover,
+.accordion-panel table:hover {
+    box-shadow: none;
+    cursor: default;
+}
+
+/* Table Styles */
+.accordion-panel table, .summary-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    box-shadow: none; /* Ensure no shadow on tables */
+}
+.accordion-panel table:hover {
+    box-shadow: none;
+}
+
+
+.accordion-panel th, .accordion-panel td,
+.summary-preview th, .summary-preview td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.accordion-panel th, .summary-preview th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+
+/* Conversation List Item Specifics */
+.conversation-item {
+    display: block; /* Override display:flex from the global li style */
+    cursor: pointer;
+    position: relative; /* For positioning the icon */
+}
+
+.conversation-item .trigger-container {
+    width: calc(100% - 30px); /* Leave space for the icon */
 }
 
 /* Fact Status Styles */
@@ -185,4 +235,67 @@ nav a:hover {
 .cancel-btn {
     background-color: #6c757d;
     color: white;
+}
+
+/* Accordion Styles */
+.conversation-item {
+    cursor: pointer;
+    position: relative; /* For positioning the icon */
+    /* No flex properties here to allow natural block-level rendering */
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.conversation-item .trigger-container {
+    width: calc(100% - 30px); /* Leave space for the icon */
+}
+
+.accordion-icon {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ccc;
+    transition: transform 0.3s ease-out;
+}
+
+.conversation-item.active .accordion-icon {
+    transform: rotate(90deg);
+}
+
+.summary-preview {
+    position: relative;
+    max-height: 150px; /* Limit preview height */
+    overflow: hidden;
+}
+
+.summary-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: linear-gradient(to bottom, transparent, white);
+    pointer-events: none; /* Allows clicking through the fade */
+}
+
+.conversation-item.active .summary-preview {
+    max-height: none; /* Remove height limit when active */
+}
+
+.conversation-item.active .summary-preview::after {
+    display: none; /* Hide fade when active */
+}
+
+.accordion-panel {
+    padding: 1rem;
+    background-color: #f9f9f9;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    border-top: 1px solid #eee;
+    margin-top: 1rem;
+    width: 100%; /* Ensure panel takes full width */
 }

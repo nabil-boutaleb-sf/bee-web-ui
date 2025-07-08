@@ -560,7 +560,20 @@ function editFact(li, factId, currentText) {
 
 async function loadConversations() {
     const conversationsContainer = document.getElementById('conversations-container');
+
     try {
+        // Explicitly check if the markdown-it library is loaded
+        if (typeof window.markdownit !== 'function') {
+            throw new Error('Markdown rendering library failed to load. Please check your network connection or ad-blocker.');
+        }
+
+        // Initialize markdown-it
+        const md = window.markdownit({
+            html: true, // Enable HTML tags in source
+            breaks: true, // Convert '\n' in paragraphs into <br>
+            linkify: true // Autoconvert URL-like text to links
+        });
+
         const response = await fetch('/api/conversations');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -575,13 +588,60 @@ async function loadConversations() {
             const ul = document.createElement('ul');
             conversations.forEach(conversation => {
                 const li = document.createElement('li');
-                li.textContent = conversation.summary;
+                li.classList.add('conversation-item');
+                li.dataset.conversationId = conversation.id;
+
+                // --- Visible Trigger Area ---
+                const triggerContainer = document.createElement('div');
+                triggerContainer.classList.add('trigger-container');
+
+                const title = document.createElement('h3');
+                title.textContent = conversation.short_summary || 'Conversation';
+                triggerContainer.appendChild(title);
+
+                const state = document.createElement('p');
+                state.textContent = `State: ${conversation.state}`;
+                triggerContainer.appendChild(state);
+
+                const timeInfo = document.createElement('p');
+                const startTime = new Date(conversation.start_time).toLocaleString();
+                const endTime = conversation.end_time ? new Date(conversation.end_time).toLocaleString() : 'Ongoing';
+                timeInfo.textContent = `Time: ${startTime} - ${endTime}`;
+                triggerContainer.appendChild(timeInfo);
+
+                li.appendChild(triggerContainer);
+
+                // --- Collapsible Panel ---
+                const panel = document.createElement('div');
+                panel.classList.add('accordion-panel');
+                panel.innerHTML = md.render(conversation.summary || 'No detailed content available.');
+                
+                if (conversation.state !== 'CAPTURING') {
+                    const icon = document.createElement('span');
+                    icon.classList.add('accordion-icon');
+                    icon.innerHTML = '&#8250;'; // Chevron right
+                    li.appendChild(icon);
+                    li.appendChild(panel);
+
+                    li.addEventListener('click', () => {
+                        li.classList.toggle('active');
+                        const currentPanel = li.querySelector('.accordion-panel');
+                        if (currentPanel.style.maxHeight) {
+                            currentPanel.style.maxHeight = null;
+                        } else {
+                            currentPanel.style.maxHeight = currentPanel.scrollHeight + "px";
+                        }
+                    });
+                } else {
+                    li.style.cursor = 'default';
+                }
+
                 ul.appendChild(li);
             });
             conversationsContainer.appendChild(ul);
         }
     } catch (error) {
         console.error('Failed to load conversations:', error);
-        conversationsContainer.innerHTML = '<p>Error loading conversations. Check the console for details.</p>';
+        conversationsContainer.innerHTML = `<p style="color: red;">${error.message}</p><p>Check the console for more details.</p>`;
     }
 }

@@ -12,8 +12,13 @@ The project is built with a Node.js/Express backend that serves a vanilla HTML, 
 
 - **Backend as a Proxy:** The Node.js server acts as a proxy to the Bee API. This is a crucial security measure to protect the `BEE_API_TOKEN`, which is stored in a `.env` file on the server and should never be exposed to the frontend.
 - **Multi-Page Application:** The application is structured with multiple pages for different functionalities (Home, Todos, Facts, Conversations).
-- **Official SDK:** The project uses the `beeai` npm package for all interactions with the Bee API in the main application. This iOks the preferred method over direct API calls.
+- **Official SDK:** The project uses the `beeai` npm package for all interactions with the Bee API in the main application. This is the preferred method over direct API calls.
+- **Markdown Rendering:** The `markdown-it` library is used for rendering markdown content, particularly for conversations. It is configured to support HTML, line breaks, and linkification.
 - **Isolated Test Environment:** The project includes a dedicated test page (`public/test.html`) that uses a separate, isolated API router (`/test-api`) to make direct calls to the Bee API, bypassing the SDK. This allows for independent testing of the API.
+
+## Common UI/CSS Patterns and Pitfalls
+
+- **Flexbox Conflicts in List Items:** Be aware that global `li` (list item) styles (e.g., `display: flex`) can conflict with the rendering of complex, block-level content (like markdown-parsed HTML containing lists, tables, or paragraphs) within individual list items. When such conflicts occur, explicitly override the `display` property to `block` (or another appropriate block-level display) for the specific list item class (e.g., `.conversation-item`) to ensure proper rendering of nested block elements.
 
 ## Agent Instructions and Preferences
 

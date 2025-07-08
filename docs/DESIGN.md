@@ -23,7 +23,7 @@ The application is divided into the following pages:
 -   **/ (Home):** A welcome page that displays the connection status to the Bee API.
 -   **/todos:** Displays the user's todos, separated into "Incomplete" and "Completed" lists. Users can complete, edit, and delete todos.
 -   **/facts:** Displays the user's facts, separated into "Confirmed" and "Unconfirmed" lists. Users can confirm, unconfirm, edit, and delete facts.
--   **/conversations:** Displays a list of the user's conversations.
+-   **/conversations:** Displays a list of the user's conversations in an accordion format. Each item shows key metadata (summary, state, time) and expands to reveal the full, markdown-rendered conversation content.
 -   **/test.html:** A dedicated test page for direct interaction with the Bee API.
 
 ## 4. Key Features
@@ -45,8 +45,8 @@ The application is divided into the following pages:
 ## 5. Future Enhancements
 
 -   **Conversations Page:**
-    -   Display conversation metadata (e.g., date, number of messages).
-    -   Allow users to view the full content of a conversation.
+    -   [x] Display conversation metadata (e.g., date, number of messages).
+    -   [x] Allow users to view the full content of a conversation (implemented as an accordion with markdown rendering).
     -   Implement a search or filter for conversations.
 -   **General UI/UX:**
     -   Add an inline creation form for new items (facts, todos).
