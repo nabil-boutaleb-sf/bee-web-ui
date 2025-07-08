@@ -20,10 +20,21 @@
         <h1>Facts</h1>
         <div id="facts-container">
             <h2>Confirmed Facts</h2>
+            <div class="bulk-actions-container">
+                <input type="checkbox" id="select-all-confirmed-facts" title="Select all confirmed facts">
+                <button id="bulk-delete-confirmed-facts">Delete Selected</button>
+                <button id="bulk-unconfirm-selected-facts">Unconfirm Selected</button>
+            </div>
             <div id="confirmed-facts-list">
                 <p>Loading confirmed facts...</p>
             </div>
+
             <h2>Unconfirmed Facts</h2>
+            <div class="bulk-actions-container">
+                <input type="checkbox" id="select-all-unconfirmed-facts" title="Select all unconfirmed facts">
+                <button id="bulk-delete-unconfirmed-facts">Delete Selected</button>
+                <button id="bulk-confirm-unconfirmed-facts">Confirm Selected</button>
+            </div>
             <div id="unconfirmed-facts-list">
                 <p>Loading unconfirmed facts...</p>
             </div>
