@@ -27,41 +27,95 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Todos Page (for todos.html) ---
     if (todosContainer) {
         loadTodos();
+        const todoSearchInput = document.getElementById('todo-search');
+        if (todoSearchInput) {
+            todoSearchInput.addEventListener('input', () => {
+                // Debounce search to avoid excessive API calls
+                clearTimeout(todoSearchInput.searchTimeout);
+                todoSearchInput.searchTimeout = setTimeout(() => {
+                    currentPageTodos = 1; // Reset to first page for new search
+                    loadTodos(todoSearchInput.value);
+                }, 300);
+            });
+        }
     }
 
     // --- Facts Page (for facts.html) ---
     if (factsContainer) {
-        loadFacts();
+        loadFacts(); // Initial load
+        const factSearchInput = document.getElementById('fact-search');
+        if (factSearchInput) {
+            factSearchInput.addEventListener('input', () => {
+                clearTimeout(factSearchInput.searchTimeout);
+                factSearchInput.searchTimeout = setTimeout(() => {
+                    currentPageConfirmed = 1; // Reset page for new search
+                    currentPageUnconfirmed = 1; // Reset page for new search
+                    loadFacts(factSearchInput.value);
+                }, 300);
+            });
+        }
     }
 
     // --- Conversations Page (for conversations.html) ---
     if (conversationsContainer) {
-        loadConversations();
+        loadConversations(); // Initial load
+        const conversationSearchInput = document.getElementById('conversation-search');
+        if (conversationSearchInput) {
+            conversationSearchInput.addEventListener('input', () => {
+                clearTimeout(conversationSearchInput.searchTimeout);
+                conversationSearchInput.searchTimeout = setTimeout(() => {
+                    // Note: Conversations API doesn't have pagination in the current setup.
+                    // Search will filter all loaded conversations.
+                    loadConversations(conversationSearchInput.value);
+                }, 300);
+            });
+        }
     }
 });
 
 
 let currentPageTodos = 1;
 const todosLimit = 10;
+let allTodos = []; // Cache for all todos to filter locally
 
-async function loadTodos() {
+async function loadTodos(searchTerm = '') {
     const incompleteTodosList = document.getElementById('incomplete-todos-list');
     const completedTodosList = document.getElementById('completed-todos-list');
     const todosContainer = document.getElementById('todos-container');
 
     try {
-        const response = await fetch(`/api/todos?page=${currentPageTodos}&limit=${todosLimit}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Fetch all todos if not already cached or if it's the initial load without search
+        // If there's a search term, we assume the API supports it or we filter client-side.
+        // For this example, let's assume the API /api/todos does NOT support a search query parameter.
+        // So, we'll fetch all and filter client-side.
+        // A more robust solution would involve backend search.
+        if (allTodos.length === 0 || searchTerm === '') { // Simplified condition, might need refinement
+            const response = await fetch(`/api/todos?page=1&limit=1000`); // Fetch a large number to simulate getting all
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            allTodos = data.todos; // Cache them
         }
-        const data = await response.json();
-        const todos = data.todos;
+
+        let todosToDisplay = allTodos;
+
+        if (searchTerm) {
+            todosToDisplay = allTodos.filter(todo => todo.text.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+
+        // Apply pagination to the filtered list
+        const startIndex = (currentPageTodos - 1) * todosLimit;
+        const endIndex = startIndex + todosLimit;
+        const paginatedTodos = todosToDisplay.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(todosToDisplay.length / todosLimit) || 1;
+
 
         incompleteTodosList.innerHTML = '';
         completedTodosList.innerHTML = '';
 
-        const incompleteTodos = todos.filter(todo => !todo.completed);
-        const completedTodos = todos.filter(todo => todo.completed);
+        const incompleteTodos = paginatedTodos.filter(todo => !todo.completed);
+        const completedTodos = paginatedTodos.filter(todo => todo.completed);
 
         if (incompleteTodos.length === 0) {
             incompleteTodosList.innerHTML = '<p>No incomplete todos found.</p>';
@@ -137,20 +191,20 @@ async function loadTodos() {
         prevButton.disabled = currentPageTodos === 1;
         prevButton.onclick = () => {
             currentPageTodos--;
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         };
         paginationContainer.appendChild(prevButton);
 
         const pageInfo = document.createElement('span');
-        pageInfo.textContent = `Page ${currentPageTodos} of ${data.totalPages}`;
+        pageInfo.textContent = `Page ${currentPageTodos} of ${totalPages}`;
         paginationContainer.appendChild(pageInfo);
 
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.disabled = todos.length < todosLimit;
+        nextButton.disabled = currentPageTodos >= totalPages;
         nextButton.onclick = () => {
             currentPageTodos++;
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         };
         paginationContainer.appendChild(nextButton);
 
@@ -266,30 +320,45 @@ async function updateTodo(todoId, text) {
 
 let currentPageConfirmed = 1;
 let currentPageUnconfirmed = 1;
-const limit = 10;
+const limit = 10; // Used for pagination, not for initial fetch if searching
+let allConfirmedFacts = [];
+let allUnconfirmedFacts = [];
 
-async function loadFacts() {
-    await loadConfirmedFacts();
-    await loadUnconfirmedFacts();
+async function loadFacts(searchTerm = '') {
+    await loadConfirmedFacts(searchTerm);
+    await loadUnconfirmedFacts(searchTerm);
 }
 
-async function loadConfirmedFacts() {
+async function loadConfirmedFacts(searchTerm = '') {
     const confirmedFactsList = document.getElementById('confirmed-facts-list');
     try {
-        const response = await fetch(`/api/facts?confirmed=true&page=${currentPageConfirmed}&limit=${limit}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (allConfirmedFacts.length === 0 || searchTerm === '') { // Fetch only if cache is empty or no search
+            const response = await fetch(`/api/facts?confirmed=true&page=1&limit=1000`); // Fetch all
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            allConfirmedFacts = data.facts;
         }
-        const data = await response.json();
-        const facts = data.facts;
+
+        let factsToDisplay = allConfirmedFacts;
+        if (searchTerm) {
+            factsToDisplay = allConfirmedFacts.filter(fact => fact.text.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+
+        // Apply pagination to the filtered list
+        const startIndex = (currentPageConfirmed - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedFacts = factsToDisplay.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(factsToDisplay.length / limit) || 1;
 
         confirmedFactsList.innerHTML = '';
 
-        if (facts.length === 0) {
-            confirmedFactsList.innerHTML = '<p>No confirmed facts found.</p>';
+        if (paginatedFacts.length === 0) {
+            confirmedFactsList.innerHTML = searchTerm ? '<p>No confirmed facts match your search.</p>' : '<p>No confirmed facts found.</p>';
         } else {
             const ul = document.createElement('ul');
-            facts.forEach(fact => {
+            paginatedFacts.forEach(fact => {
                 const li = document.createElement('li');
                 li.textContent = fact.text;
                 li.dataset.factId = fact.id;
@@ -331,20 +400,20 @@ async function loadConfirmedFacts() {
         prevButton.disabled = currentPageConfirmed === 1;
         prevButton.onclick = () => {
             currentPageConfirmed--;
-            loadConfirmedFacts();
+            loadConfirmedFacts(document.getElementById('fact-search')?.value || '');
         };
         paginationContainer.appendChild(prevButton);
 
         const pageInfo = document.createElement('span');
-        pageInfo.textContent = `Page ${currentPageConfirmed} of ${data.totalPages}`;
+        pageInfo.textContent = `Page ${currentPageConfirmed} of ${totalPages}`;
         paginationContainer.appendChild(pageInfo);
 
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.disabled = facts.length < limit;
+        nextButton.disabled = currentPageConfirmed >= totalPages;
         nextButton.onclick = () => {
             currentPageConfirmed++;
-            loadConfirmedFacts();
+            loadConfirmedFacts(document.getElementById('fact-search')?.value || '');
         };
         paginationContainer.appendChild(nextButton);
 
@@ -356,23 +425,36 @@ async function loadConfirmedFacts() {
     }
 }
 
-async function loadUnconfirmedFacts() {
+async function loadUnconfirmedFacts(searchTerm = '') {
     const unconfirmedFactsList = document.getElementById('unconfirmed-facts-list');
     try {
-        const response = await fetch(`/api/facts?confirmed=false&page=${currentPageUnconfirmed}&limit=${limit}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (allUnconfirmedFacts.length === 0 || searchTerm === '') { // Fetch only if cache is empty or no search
+            const response = await fetch(`/api/facts?confirmed=false&page=1&limit=1000`); // Fetch all
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            allUnconfirmedFacts = data.facts;
         }
-        const data = await response.json();
-        const facts = data.facts;
+
+        let factsToDisplay = allUnconfirmedFacts;
+        if (searchTerm) {
+            factsToDisplay = allUnconfirmedFacts.filter(fact => fact.text.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+
+        // Apply pagination to the filtered list
+        const startIndex = (currentPageUnconfirmed - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedFacts = factsToDisplay.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(factsToDisplay.length / limit) || 1;
 
         unconfirmedFactsList.innerHTML = '';
 
-        if (facts.length === 0) {
-            unconfirmedFactsList.innerHTML = '<p>No unconfirmed facts found.</p>';
+        if (paginatedFacts.length === 0) {
+            unconfirmedFactsList.innerHTML = searchTerm ? '<p>No unconfirmed facts match your search.</p>' : '<p>No unconfirmed facts found.</p>';
         } else {
             const ul = document.createElement('ul');
-            facts.forEach(fact => {
+            paginatedFacts.forEach(fact => {
                 const li = document.createElement('li');
                 li.textContent = fact.text;
                 li.dataset.factId = fact.id;
@@ -414,20 +496,20 @@ async function loadUnconfirmedFacts() {
         prevButton.disabled = currentPageUnconfirmed === 1;
         prevButton.onclick = () => {
             currentPageUnconfirmed--;
-            loadUnconfirmedFacts();
+            loadUnconfirmedFacts(document.getElementById('fact-search')?.value || '');
         };
         paginationContainer.appendChild(prevButton);
 
         const pageInfo = document.createElement('span');
-        pageInfo.textContent = `Page ${currentPageUnconfirmed} of ${data.totalPages}`;
+        pageInfo.textContent = `Page ${currentPageUnconfirmed} of ${totalPages}`;
         paginationContainer.appendChild(pageInfo);
 
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.disabled = facts.length < limit;
+        nextButton.disabled = currentPageUnconfirmed >= totalPages;
         nextButton.onclick = () => {
             currentPageUnconfirmed++;
-            loadUnconfirmedFacts();
+            loadUnconfirmedFacts(document.getElementById('fact-search')?.value || '');
         };
         paginationContainer.appendChild(nextButton);
 
@@ -558,24 +640,37 @@ function editFact(li, factId, currentText) {
     input.focus();
 }
 
-async function loadConversations() {
+let allConversations = []; // Cache for all conversations
+
+async function loadConversations(searchTerm = '') {
     const conversationsContainer = document.getElementById('conversations-container');
     try {
-        const response = await fetch('/api/conversations');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Fetch all conversations if not already cached or if it's an initial load without search
+        if (allConversations.length === 0 || searchTerm === '') {
+            const response = await fetch('/api/conversations'); // This API fetches all, no pagination
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            allConversations = await response.json(); // Cache them
         }
-        const conversations = await response.json();
+
+        let conversationsToDisplay = allConversations;
+
+        if (searchTerm) {
+            conversationsToDisplay = allConversations.filter(conv =>
+                conv.summary.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
 
         conversationsContainer.innerHTML = '';
 
-        if (conversations.length === 0) {
-            conversationsContainer.innerHTML = '<p>No conversations found.</p>';
+        if (conversationsToDisplay.length === 0) {
+            conversationsContainer.innerHTML = searchTerm ? '<p>No conversations match your search.</p>' : '<p>No conversations found.</p>';
         } else {
             const ul = document.createElement('ul');
-            conversations.forEach(conversation => {
+            conversationsToDisplay.forEach(conversation => {
                 const li = document.createElement('li');
-                li.textContent = conversation.summary;
+                li.textContent = conversation.summary; // Assuming 'summary' is the field to search
                 ul.appendChild(li);
             });
             conversationsContainer.appendChild(ul);
