@@ -27,11 +27,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Todos Page (for todos.html) ---
     if (todosContainer) {
         loadTodos();
+        // Event listeners for bulk actions - Todos
+        document.getElementById('select-all-incomplete-todos')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'incomplete-todos-list'));
+        document.getElementById('bulk-delete-incomplete-todos')?.addEventListener('click', () => bulkDeleteTodos('incomplete'));
+        document.getElementById('bulk-complete-incomplete-todos')?.addEventListener('click', () => bulkCompleteTodos());
+
+        document.getElementById('select-all-completed-todos')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'completed-todos-list'));
+        document.getElementById('bulk-delete-completed-todos')?.addEventListener('click', () => bulkDeleteTodos('completed'));
     }
 
     // --- Facts Page (for facts.html) ---
     if (factsContainer) {
         loadFacts();
+        // Event listeners for bulk actions - Facts
+        document.getElementById('select-all-confirmed-facts')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'confirmed-facts-list'));
+        document.getElementById('bulk-delete-confirmed-facts')?.addEventListener('click', () => bulkDeleteFacts('confirmed'));
+        document.getElementById('bulk-unconfirm-selected-facts')?.addEventListener('click', () => bulkUnconfirmFacts());
+
+        document.getElementById('select-all-unconfirmed-facts')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'unconfirmed-facts-list'));
+        document.getElementById('bulk-delete-unconfirmed-facts')?.addEventListener('click', () => bulkDeleteFacts('unconfirmed'));
+        document.getElementById('bulk-confirm-unconfirmed-facts')?.addEventListener('click', () => bulkConfirmFacts());
     }
 
     // --- Conversations Page (for conversations.html) ---
@@ -59,8 +74,13 @@ async function loadTodos() {
         const data = await response.json();
         const todos = data.todos;
 
-        incompleteTodosList.innerHTML = '';
-        completedTodosList.innerHTML = '';
+        incompleteTodosList.innerHTML = ''; // Clear previous items
+        completedTodosList.innerHTML = ''; // Clear previous items
+
+        // Clear "select all" checkboxes on load (especially for pagination)
+        document.getElementById('select-all-incomplete-todos') && (document.getElementById('select-all-incomplete-todos').checked = false);
+        document.getElementById('select-all-completed-todos') && (document.getElementById('select-all-completed-todos').checked = false);
+
 
         const incompleteTodos = todos.filter(todo => !todo.completed);
         const completedTodos = todos.filter(todo => todo.completed);
@@ -71,8 +91,18 @@ async function loadTodos() {
             const ul = document.createElement('ul');
             incompleteTodos.forEach(todo => {
                 const li = document.createElement('li');
-                li.textContent = todo.text;
                 li.dataset.todoId = todo.id;
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('todo-checkbox');
+                checkbox.dataset.todoId = todo.id;
+                li.appendChild(checkbox);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = todo.text;
+                textSpan.classList.add('item-text');
+                li.appendChild(textSpan);
 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
@@ -107,9 +137,19 @@ async function loadTodos() {
             const ul = document.createElement('ul');
             completedTodos.forEach(todo => {
                 const li = document.createElement('li');
-                li.textContent = todo.text;
                 li.dataset.todoId = todo.id;
                 li.classList.add('completed');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('todo-checkbox');
+                checkbox.dataset.todoId = todo.id;
+                li.appendChild(checkbox);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = todo.text;
+                textSpan.classList.add('item-text');
+                li.appendChild(textSpan);
 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
@@ -162,6 +202,191 @@ async function loadTodos() {
         console.error('Failed to load todos:', error);
         incompleteTodosList.innerHTML = '<p>Error loading incomplete todos. Check the console for details.</p>';
         completedTodosList.innerHTML = '<p>Error loading completed todos. Check the console for details.</p>';
+    }
+}
+
+// --- Bulk Action Helper ---
+function toggleSelectAll(sourceCheckbox, listId) {
+    const listContainer = document.getElementById(listId);
+    if (!listContainer) return;
+    const checkboxes = listContainer.querySelectorAll('input[type="checkbox"].todo-checkbox, input[type="checkbox"].fact-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = sourceCheckbox.checked;
+    });
+}
+
+// --- Bulk Todo Actions ---
+async function bulkDeleteTodos(type) {
+    const listId = type === 'incomplete' ? 'incomplete-todos-list' : 'completed-todos-list';
+    const listContainer = document.getElementById(listId);
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].todo-checkbox:checked'))
+        .map(cb => cb.dataset.todoId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one todo to delete.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected todo(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/todos/bulk-delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ todoIds: selectedIds })
+        });
+        if (response.ok) {
+            loadTodos(); // Reload todos
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to delete selected todos: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk deleting todos:', error);
+        alert('Error bulk deleting todos.');
+    }
+}
+
+async function bulkCompleteTodos() {
+    const listContainer = document.getElementById('incomplete-todos-list');
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].todo-checkbox:checked'))
+        .map(cb => cb.dataset.todoId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one todo to complete.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to complete ${selectedIds.length} selected todo(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/todos/bulk-complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ todoIds: selectedIds })
+        });
+        if (response.ok) {
+            loadTodos(); // Reload todos
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to complete selected todos: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk completing todos:', error);
+        alert('Error bulk completing todos.');
+    }
+}
+
+
+// --- Bulk Fact Actions ---
+async function bulkDeleteFacts(type) {
+    const listId = type === 'confirmed' ? 'confirmed-facts-list' : 'unconfirmed-facts-list';
+    const listContainer = document.getElementById(listId);
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].fact-checkbox:checked'))
+        .map(cb => cb.dataset.factId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one fact to delete.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected fact(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/facts/bulk-delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ factIds: selectedIds })
+        });
+        if (response.ok) {
+            loadFacts(); // Reload facts
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to delete selected facts: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk deleting facts:', error);
+        alert('Error bulk deleting facts.');
+    }
+}
+
+async function bulkConfirmFacts() {
+    const listContainer = document.getElementById('unconfirmed-facts-list');
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].fact-checkbox:checked'))
+        .map(cb => cb.dataset.factId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one fact to confirm.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to confirm ${selectedIds.length} selected fact(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/facts/bulk-confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ factIds: selectedIds })
+        });
+        if (response.ok) {
+            loadFacts(); // Reload facts
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to confirm selected facts: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk confirming facts:', error);
+        alert('Error bulk confirming facts.');
+    }
+}
+
+async function bulkUnconfirmFacts() {
+    const listContainer = document.getElementById('confirmed-facts-list');
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].fact-checkbox:checked'))
+        .map(cb => cb.dataset.factId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one fact to unconfirm.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to unconfirm ${selectedIds.length} selected fact(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/facts/bulk-unconfirm', { // Corrected endpoint
+            method: 'POST', // Should be POST or PUT, aligning with backend
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ factIds: selectedIds })
+        });
+        if (response.ok) {
+            loadFacts(); // Reload facts
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to unconfirm selected facts: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk unconfirming facts:', error);
+        alert('Error bulk unconfirming facts.');
     }
 }
 
@@ -285,7 +510,10 @@ async function loadConfirmedFacts() {
         const data = await response.json();
         const facts = data.facts;
 
-        confirmedFactsList.innerHTML = '';
+        confirmedFactsList.innerHTML = ''; // Clear previous items
+        // Clear "select all" checkbox on load
+        document.getElementById('select-all-confirmed-facts') && (document.getElementById('select-all-confirmed-facts').checked = false);
+
 
         if (facts.length === 0) {
             confirmedFactsList.innerHTML = '<p>No confirmed facts found.</p>';
@@ -293,9 +521,19 @@ async function loadConfirmedFacts() {
             const ul = document.createElement('ul');
             facts.forEach(fact => {
                 const li = document.createElement('li');
-                li.textContent = fact.text;
                 li.dataset.factId = fact.id;
                 li.classList.add('confirmed');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('fact-checkbox');
+                checkbox.dataset.factId = fact.id;
+                li.appendChild(checkbox);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = fact.text;
+                textSpan.classList.add('item-text');
+                li.appendChild(textSpan);
 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
@@ -368,7 +606,9 @@ async function loadUnconfirmedFacts() {
         const data = await response.json();
         const facts = data.facts;
 
-        unconfirmedFactsList.innerHTML = '';
+        unconfirmedFactsList.innerHTML = ''; // Clear previous items
+        // Clear "select all" checkbox on load
+        document.getElementById('select-all-unconfirmed-facts') && (document.getElementById('select-all-unconfirmed-facts').checked = false);
 
         if (facts.length === 0) {
             unconfirmedFactsList.innerHTML = '<p>No unconfirmed facts found.</p>';
@@ -376,9 +616,19 @@ async function loadUnconfirmedFacts() {
             const ul = document.createElement('ul');
             facts.forEach(fact => {
                 const li = document.createElement('li');
-                li.textContent = fact.text;
                 li.dataset.factId = fact.id;
                 li.classList.add('unconfirmed');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('fact-checkbox');
+                checkbox.dataset.factId = fact.id;
+                li.appendChild(checkbox);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = fact.text;
+                textSpan.classList.add('item-text');
+                li.appendChild(textSpan);
 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');

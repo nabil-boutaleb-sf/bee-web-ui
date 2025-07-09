@@ -346,3 +346,91 @@ nav a:hover {
     margin-top: 1rem;
     width: 100%; /* Ensure panel takes full width */
 }
+
+/* Styling for bulk action containers */
+.bulk-actions-container {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between elements */
+}
+
+.bulk-actions-container input[type="checkbox"] {
+    margin-right: 5px;
+    height: 18px; /* Taller checkbox */
+    width: 18px; /* Wider checkbox */
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.bulk-actions-container button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.bulk-actions-container button:hover {
+    background-color: #0056b3;
+}
+
+/* Styling for individual item checkboxes */
+li input[type="checkbox"].todo-checkbox,
+li input[type="checkbox"].fact-checkbox {
+    margin-right: 10px;
+    cursor: pointer;
+    height: 16px; /* Taller checkbox */
+    width: 16px; /* Wider checkbox */
+    vertical-align: middle; /* Align with text */
+}
+
+/* Adjust list item display to accommodate checkbox and buttons */
+/* The existing 'li' style already uses flex, so we just need to ensure
+   the children are spaced correctly. */
+
+li .item-text {
+    flex-grow: 1; /* Allow text to take available space */
+    margin-right: 10px; /* Space between text and buttons */
+    margin-left: 5px; /* Give a little space after the checkbox */
+}
+
+/* Ensure that the edit form within a list item also behaves well with flex */
+/* The existing 'edit-fact-form' style already uses flex.
+   We might want to adjust input width if needed. */
+li form.edit-fact-form input.edit-fact-input {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+/* Pagination container styles */
+.pagination-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-container button {
+    margin: 0 5px;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination-container button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.pagination-container span {
+    margin: 0 10px;
+    font-size: 1em;
+}

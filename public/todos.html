@@ -20,10 +20,20 @@
         <h1>Todos</h1>
         <div id="todos-container">
             <h2>Incomplete Todos</h2>
+            <div class="bulk-actions-container">
+                <input type="checkbox" id="select-all-incomplete-todos" title="Select all incomplete todos">
+                <button id="bulk-delete-incomplete-todos">Delete Selected</button>
+                <button id="bulk-complete-incomplete-todos">Complete Selected</button>
+            </div>
             <div id="incomplete-todos-list">
                 <p>Loading incomplete todos...</p>
             </div>
+
             <h2>Completed Todos</h2>
+            <div class="bulk-actions-container">
+                <input type="checkbox" id="select-all-completed-todos" title="Select all completed todos">
+                <button id="bulk-delete-completed-todos">Delete Selected</button>
+            </div>
             <div id="completed-todos-list">
                 <p>Loading completed todos...</p>
             </div>
