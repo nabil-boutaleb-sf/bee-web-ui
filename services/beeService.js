@@ -96,10 +96,21 @@ async function updateFact(factId, text) {
   }
 }
 
-async function getConversations() {
+async function getConversations(searchTerm = '') {
   try {
+    // The SDK likely doesn't support a direct search term.
+    // We fetch all and filter, which is what the frontend was trying to do.
+    // A more robust solution would be to paginate and search on the backend if the API allowed it.
     const response = await bee.getConversations('me');
-    return response.conversations;
+    let conversations = response.conversations;
+
+    if (searchTerm) {
+      conversations = conversations.filter(conv =>
+        (conv.summary && conv.summary.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (conv.short_summary && conv.short_summary.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    return conversations;
   } catch (error) {
     console.error('Error fetching conversations from Bee AI SDK:', error.message);
     throw new Error('Failed to fetch conversations from Bee AI SDK.');

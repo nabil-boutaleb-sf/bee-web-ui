@@ -164,7 +164,8 @@ app.put('/api/facts/:id', async (req, res) => {
 // Endpoint to get conversations
 app.get('/api/conversations', async (req, res) => {
     try {
-        const conversations = await beeService.getConversations();
+        const searchTerm = req.query.search || '';
+        const conversations = await beeService.getConversations(searchTerm);
         res.json(conversations);
     } catch (error) {
         console.error('Error fetching conversations:', error.message);

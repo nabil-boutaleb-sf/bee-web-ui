@@ -221,7 +221,7 @@ async function completeTodo(todoId) {
     try {
         const response = await fetch(`/api/todos/${todoId}/complete`, { method: 'PUT' });
         if (response.ok) {
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         } else {
             alert('Failed to complete todo.');
         }
@@ -235,7 +235,7 @@ async function deleteTodo(todoId) {
     try {
         const response = await fetch(`/api/todos/${todoId}`, { method: 'DELETE' });
         if (response.ok) {
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         } else {
             alert('Failed to delete todo.');
         }
@@ -308,7 +308,7 @@ async function updateTodo(todoId, text) {
             body: JSON.stringify({ text })
         });
         if (response.ok) {
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         } else {
             alert('Failed to update todo.');
         }
@@ -525,7 +525,7 @@ async function deleteFact(factId) {
     try {
         const response = await fetch(`/api/facts/${factId}`, { method: 'DELETE' });
         if (response.ok) {
-            loadFacts(); // Reload both lists after deleting
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             alert('Failed to delete fact.');
         }
@@ -539,7 +539,7 @@ async function confirmFact(factId) {
     try {
         const response = await fetch(`/api/facts/${factId}/confirm`, { method: 'PUT' });
         if (response.ok) {
-            loadFacts(); // Reload both lists after confirming
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             alert('Failed to confirm fact.');
         }
@@ -553,7 +553,7 @@ async function unconfirmFact(factId) {
     try {
         const response = await fetch(`/api/facts/${factId}/unconfirm`, { method: 'PUT' });
         if (response.ok) {
-            loadFacts(); // Reload both lists after unconfirming
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             alert('Failed to unconfirm fact.');
         }
@@ -573,7 +573,7 @@ async function updateFact(factId, text) {
             body: JSON.stringify({ text })
         });
         if (response.ok) {
-            loadFacts();
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             alert('Failed to update fact.');
         }
@@ -645,32 +645,34 @@ let allConversations = []; // Cache for all conversations
 async function loadConversations(searchTerm = '') {
     const conversationsContainer = document.getElementById('conversations-container');
     try {
-        // Fetch all conversations if not already cached or if it's an initial load without search
-        if (allConversations.length === 0 || searchTerm === '') {
-            const response = await fetch('/api/conversations'); // This API fetches all, no pagination
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            allConversations = await response.json(); // Cache them
+        const response = await fetch(`/api/conversations?search=${encodeURIComponent(searchTerm)}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        let conversationsToDisplay = allConversations;
-
-        if (searchTerm) {
-            conversationsToDisplay = allConversations.filter(conv =>
-                conv.summary.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
+        const conversations = await response.json();
 
         conversationsContainer.innerHTML = '';
 
-        if (conversationsToDisplay.length === 0) {
+        if (conversations.length === 0) {
             conversationsContainer.innerHTML = searchTerm ? '<p>No conversations match your search.</p>' : '<p>No conversations found.</p>';
         } else {
             const ul = document.createElement('ul');
-            conversationsToDisplay.forEach(conversation => {
+            conversations.forEach(conversation => {
                 const li = document.createElement('li');
-                li.textContent = conversation.summary; // Assuming 'summary' is the field to search
+                // Re-create the accordion structure from previous work
+                li.classList.add('conversation-item');
+                li.dataset.conversationId = conversation.id;
+
+                const triggerContainer = document.createElement('div');
+                triggerContainer.classList.add('trigger-container');
+
+                const title = document.createElement('h3');
+                title.textContent = conversation.short_summary || 'Conversation';
+                triggerContainer.appendChild(title);
+
+                // Add other metadata if needed, like state or time
+
+                li.appendChild(triggerContainer);
                 ul.appendChild(li);
             });
             conversationsContainer.appendChild(ul);
