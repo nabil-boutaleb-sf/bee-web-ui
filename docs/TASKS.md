@@ -18,7 +18,7 @@ This document outlines the development tasks for the Bee Web UI project.
 - [ ] **General UI/UX:**
     - [ ] Add an inline creation form for new items (facts, todos).
     - [ ] Implement a search/filter for items on all pages.
-    - [ ] Implement bulk actions (e.g., delete, confirm).
+    - [x] Implement bulk actions (e.g., delete, confirm).
     - [ ] Display date/source information for items (if available from the API).
     - [ ] Improve the visual design and branding.
 

@@ -72,15 +72,6 @@ This document outlines the recent changes made to the Bee Web UI application.
     - **File Organization:** Moved `CHANGELOG.md` and `bee api screenshots` directory into the `docs` folder.
     - **Documentation Updates:** Updated `TASKS.md`, `README.md`, `DESIGN.md`, `GEMINI.md`, and `test_cases.md` to reflect current project status and future plans.
 
-### Further Development (July 9, 2025)
-
-- **Bulk Actions Implementation:**
-    - Implemented bulk actions for both Todos and Facts pages, allowing users to delete, complete, confirm, or unconfirm multiple items at once.
-    - Added corresponding API endpoints (`/api/todos/bulk-delete`, `/api/todos/bulk-complete`, `/api/facts/bulk-delete`, `/api/facts/bulk-confirm`, `/api/facts/bulk-unconfirm`) and service functions.
-    - Included comprehensive logging on the backend to aid in debugging.
-- **Conversations Page:**
-    - Added pagination to the conversations page to improve performance and user experience when dealing with a large number of conversations.
-
 ### Further Development (July 8, 2025)
 
 - **Suggested Todos Investigation:**
@@ -103,4 +94,13 @@ This document outlines the recent changes made to the Bee Web UI application.
         - **Library Swap Attempt:** Replaced `marked.js` with `markdown-it.js` to address markdown parsing inconsistencies.
         - **Loading Issue & CDN Fix:** Discovered that `markdown-it.js` was not loading due to an incorrect CDN link (pointing to a Cloudflare login page). The CDN link was corrected to a valid jsDelivr URL.
         - **CSS Conflict Resolution (User Implemented):** The persistent markdown formatting issues (bullet points as tables) were resolved by direct user intervention in `public/style.css` (lines 76-122). This fix correctly addresses the CSS conflicts that were preventing proper rendering of markdown-generated block elements within conversation list items.
+
+### Further Development (July 9, 2025)
+
+- **Bulk Actions Implementation:**
+    - Implemented bulk actions for both Todos and Facts pages, allowing users to delete, complete, confirm, or unconfirm multiple items at once.
+    - Added corresponding API endpoints (`/api/todos/bulk-delete`, `/api/todos/bulk-complete`, `/api/facts/bulk-delete`, `/api/facts/bulk-confirm`, `/api/facts/bulk-unconfirm`) and service functions.
+    - Included comprehensive logging on the backend to aid in debugging.
+- **Conversations Page:**
+    - Added pagination to the conversations page to improve performance and user experience when dealing with a large number of conversations.
 
