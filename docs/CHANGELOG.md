@@ -72,6 +72,15 @@ This document outlines the recent changes made to the Bee Web UI application.
     - **File Organization:** Moved `CHANGELOG.md` and `bee api screenshots` directory into the `docs` folder.
     - **Documentation Updates:** Updated `TASKS.md`, `README.md`, `DESIGN.md`, `GEMINI.md`, and `test_cases.md` to reflect current project status and future plans.
 
+### Further Development (July 9, 2025)
+
+- **Bulk Actions Implementation:**
+    - Implemented bulk actions for both Todos and Facts pages, allowing users to delete, complete, confirm, or unconfirm multiple items at once.
+    - Added corresponding API endpoints (`/api/todos/bulk-delete`, `/api/todos/bulk-complete`, `/api/facts/bulk-delete`, `/api/facts/bulk-confirm`, `/api/facts/bulk-unconfirm`) and service functions.
+    - Included comprehensive logging on the backend to aid in debugging.
+- **Conversations Page:**
+    - Added pagination to the conversations page to improve performance and user experience when dealing with a large number of conversations.
+
 ### Further Development (July 8, 2025)
 
 - **Suggested Todos Investigation:**

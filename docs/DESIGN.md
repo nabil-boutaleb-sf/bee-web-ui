@@ -47,10 +47,11 @@ The application is divided into the following pages:
 -   **Conversations Page:**
     -   [x] Display conversation metadata (e.g., date, number of messages).
     -   [x] Allow users to view the full content of a conversation (implemented as an accordion with markdown rendering).
+    -   [x] Add pagination to the conversations page.
     -   Implement a search or filter for conversations.
 -   **General UI/UX:**
+    -   [x] Implement bulk actions (e.g., delete, confirm).
     -   Add an inline creation form for new items (facts, todos).
     -   Implement a search/filter for items on all pages.
-    -   Implement bulk actions (e.g., delete, confirm).
     -   Display date/source information for items (if available from the API).
     -   Improve the visual design and branding.
