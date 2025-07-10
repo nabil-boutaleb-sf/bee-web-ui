@@ -114,3 +114,8 @@ This document outlines the recent changes made to the Bee Web UI application.
         - The current search query is now preserved after performing actions (e.g., deleting a fact, completing a todo), ensuring a seamless user experience.
     - **UI Improvements:** The search bar has been styled for a more modern and consistent look across the application.
 - **Merge Conflict Resolution:** Resolved significant merge conflicts between the `feat/search-functionality-and-playwright` and `fixes` branches, integrating the latest changes from both.
+- **Playwright Environment Setup & Debugging:**
+    - Identified and resolved issues preventing Playwright tests from running in the development container.
+    - **Root Cause:** The container environment was missing essential system-level browser dependencies, and the Playwright browser binaries were not installed.
+    - **Solution:** Migrated the development container to use an official Playwright Docker image (`mcr.microsoft.com/playwright:v1.44.0-jammy`), which includes all necessary browsers and system dependencies pre-installed. Updated `Dockerfile` and `.devcontainer/devcontainer.json` accordingly.
+    - **Debugging Steps:** Involved systematically checking server startup, browser navigation to external sites, and analyzing Playwright's detailed error messages to pinpoint the missing dependencies.

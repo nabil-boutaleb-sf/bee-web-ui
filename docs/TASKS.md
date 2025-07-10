@@ -8,7 +8,6 @@ This document outlines the development tasks for the Bee Web UI project.
 
 ## Medium Priority
 - [ ] **Investigate Suggested Todos API:** Test for a "suggestion" event via a WebSocket connection using the `websocket-test.js` script when a new suggestion is likely to be pushed by the server.
-- [x] **Integrate Markdown Reader/Editor Library:** Integrated `markdown-it` and resolved CSS conflicts to correctly render markdown content (bullet points, bold text, tables) in conversations.
 
 ## Low Priority
 - [ ] **General UI/UX:**
@@ -33,12 +32,12 @@ This document outlines the development tasks for the Bee Web UI project.
     -   [x] Implement `GET /api/todos` and `GET /api/facts` endpoints in `index.js`.
     -   [x] Implement the `PUT /api/todos/:id/complete` endpoint using the `beeai` SDK.
     -   [x] Implement the `DELETE /api/todos/:id` endpoint using the `beeai` SDK.
+    -   [x] Implement the `PUT /api/todos/:id` endpoint for editing todos.
     -   [x] Implement the `GET /api/facts` endpoint using the `beeai` SDK.
     -   [x] Implement the `DELETE /api/facts/:id` endpoint using the `beeai` SDK.
     -   [x] Implement the `PUT /api/facts/:id/confirm` endpoint using the `beeai` SDK.
     -   [x] Implement the `PUT /api/facts/:id/unconfirm` endpoint using the `beeai` SDK.
     -   [x] Implement the `PUT /api/facts/:id` endpoint for editing facts.
-    -   [x] Implement the `PUT /api/todos/:id` endpoint for editing todos.
 -   **Frontend Development:**
     -   **Home Page (`index.html`):**
         -   [x] Add navigation links to the Todos, Facts, and Test pages.
@@ -80,3 +79,8 @@ This document outlines the development tasks for the Bee Web UI project.
     -   [x] Remove redundant and verbose logging from `services/beeService.js`.
 -   **API Investigation:**
     -   [x] Contact Bee.computer developers to clarify how to access "suggested todos".
+-   **Playwright Integration:**
+    -   [x] Set up Playwright for end-to-end testing.
+    -   [x] Configure `playwright.config.js` to run tests against the local server.
+    -   [x] Resolve environment issues preventing Playwright from running (missing browser binaries and system dependencies).
+    -   [x] Migrate to an official Playwright Docker image for a pre-configured testing environment.
