@@ -84,7 +84,7 @@ This document outlines the recent changes made to the Bee Web UI application.
     - **Initial Detail View (Modal):** Implemented a modal to display full conversation content, replacing the `alert()` function. This included adding `marked.js` for markdown rendering and basic modal styling.
     - **Modal Styling Correction:** Fixed an issue where adding modal styles overwrote the entire `style.css` file due to incorrect `write_file` usage. The original styles were restored, and modal styles were correctly appended.
     - **Layout Refinement (Modal & Main View):** Adjusted modal `max-width` and `max-height` for better readability of long content. Attempted to improve main view layout by changing `li` flex properties, which initially caused new formatting issues.
-    - **UI Pattern Change (Accordion):** Replaced the modal with an accordion UI for a better user experience, allowing in-place expansion of conversation details. This involved removing modal-related HTML, CSS, and JavaScript, and adding new accordion styles.
+    - **UI Pattern Change (Accordion):** Replaced the modal with an accordion UI for a better user experience, allowing in-place expansion of conversation details. This involved removing modal-related HTML, CSS, and JavaScript, and.
     - **Accordion UI/UX Improvements:**
         - Increased the main content area width (`.main-wide`) for better use of screen space.
         - Made conversation titles (`short_summary`) more prominent using `<h3>` tags.
@@ -104,3 +104,13 @@ This document outlines the recent changes made to the Bee Web UI application.
 - **Conversations Page:**
     - Added pagination to the conversations page to improve performance and user experience when dealing with a large number of conversations.
 
+### Further Development (July 10, 2025)
+
+- **Search Functionality:**
+    - **Backend:** Implemented server-side search for the Todos, Facts, and Conversations pages. Since the Bee API doesn't support a search parameter, the backend now fetches a comprehensive list of items, filters them based on the search term, and then returns the paginated results.
+    - **Frontend:**
+        - Added search bars to the Todos, Facts, and Conversations pages.
+        - The UI now sends the search query to the backend when loading data.
+        - The current search query is now preserved after performing actions (e.g., deleting a fact, completing a todo), ensuring a seamless user experience.
+    - **UI Improvements:** The search bar has been styled for a more modern and consistent look across the application.
+- **Merge Conflict Resolution:** Resolved significant merge conflicts between the `feat/search-functionality-and-playwright` and `fixes` branches, integrating the latest changes from both.
