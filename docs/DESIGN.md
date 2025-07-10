@@ -23,7 +23,7 @@ The application is divided into the following pages:
 -   **/ (Home):** A welcome page that displays the connection status to the Bee API.
 -   **/todos:** Displays the user's todos, separated into "Incomplete" and "Completed" lists. Users can complete, edit, and delete todos.
 -   **/facts:** Displays the user's facts, separated into "Confirmed" and "Unconfirmed" lists. Users can confirm, unconfirm, edit, and delete facts.
--   **/conversations:** Displays a list of the user's conversations.
+-   **/conversations:** Displays a list of the user's conversations in an accordion format. Each item shows key metadata (summary, state, time) and expands to reveal the full, markdown-rendered conversation content.
 -   **/test.html:** A dedicated test page for direct interaction with the Bee API.
 
 ## 4. Key Features
@@ -35,7 +35,7 @@ The application is divided into the following pages:
     -   View incomplete and completed todos in separate, paginated lists.
     -   Complete, edit, and delete todos.
 -   **Conversations:**
-    -   View a list of conversations.
+    -   View a list of conversations in an accordion format, with full markdown rendering (including lists and tables) for detailed content.
 -   **Authentication:**
     -   The application uses a single `BEE_API_TOKEN` stored in a `.env` file on the server.
     -   The UI displays the connection status to the Bee API.
@@ -45,12 +45,13 @@ The application is divided into the following pages:
 ## 5. Future Enhancements
 
 -   **Conversations Page:**
-    -   Display conversation metadata (e.g., date, number of messages).
-    -   Allow users to view the full content of a conversation.
+    -   [x] Display conversation metadata (e.g., date, number of messages).
+    -   [x] Allow users to view the full content of a conversation (implemented as an accordion with markdown rendering).
+    -   [x] Add pagination to the conversations page.
     -   Implement a search or filter for conversations.
 -   **General UI/UX:**
+    -   [x] Implement bulk actions (e.g., delete, confirm).
     -   Add an inline creation form for new items (facts, todos).
     -   Implement a search/filter for items on all pages.
-    -   Implement bulk actions (e.g., delete, confirm).
     -   Display date/source information for items (if available from the API).
     -   Improve the visual design and branding.

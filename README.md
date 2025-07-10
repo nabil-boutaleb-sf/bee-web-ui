@@ -6,7 +6,7 @@ A simple web UI to interact with the [bee.computer](https://bee.computer/) API. 
 
 -   **View and Manage Facts:** See your confirmed and unconfirmed facts, with options to confirm, unconfirm, edit, and delete them.
 -   **View and Manage Todos:** See your incomplete and completed todos, with options to complete, edit, and delete them.
--   **View Conversations:** See a list of your conversations.
+-   **View Conversations:** See a list of your conversations, with full markdown rendering for detailed content.
 -   **Secure API Interaction:** The application uses a Node.js backend to securely handle API requests, so your `BEE_API_TOKEN` is never exposed to the browser.
 -   **Isolated Test Page:** A dedicated test page allows for direct interaction with the Bee API for testing and debugging purposes.
 

@@ -71,3 +71,36 @@ This document outlines the recent changes made to the Bee Web UI application.
     - **Code Cleanup:** Removed redundant and verbose logging from `services/beeService.js`.
     - **File Organization:** Moved `CHANGELOG.md` and `bee api screenshots` directory into the `docs` folder.
     - **Documentation Updates:** Updated `TASKS.md`, `README.md`, `DESIGN.md`, `GEMINI.md`, and `test_cases.md` to reflect current project status and future plans.
+
+### Further Development (July 8, 2025)
+
+- **Suggested Todos Investigation:**
+    - Investigated the Bee.computer API and SDK for a "suggested" or "unconfirmed" parameter for todos. This confirmed that no such parameter is explicitly documented or discoverable via direct API calls. 
+    - Contacted the Bee.computer developers for clarification.                     
+    - After contacting the Bee.computer developers, the investigation continued by analyzing the `suggested-todos.mp4` video. This revealed that suggestions are a distinct item type, leading to a new hypothesis that they are delivered via a WebSocket connection.
+    - Created a `websocket-test.js` script to listen for events from the Bee API server to test this hypothesis at a later time.
+    - Updated `TASKS.md` and `CHANGELOG.md` to accurately reflect the investigation's timeline and current status.
+- **Conversations Page Enhancements:**
+    - **Initial Detail View (Modal):** Implemented a modal to display full conversation content, replacing the `alert()` function. This included adding `marked.js` for markdown rendering and basic modal styling.
+    - **Modal Styling Correction:** Fixed an issue where adding modal styles overwrote the entire `style.css` file due to incorrect `write_file` usage. The original styles were restored, and modal styles were correctly appended.
+    - **Layout Refinement (Modal & Main View):** Adjusted modal `max-width` and `max-height` for better readability of long content. Attempted to improve main view layout by changing `li` flex properties, which initially caused new formatting issues.
+    - **UI Pattern Change (Accordion):** Replaced the modal with an accordion UI for a better user experience, allowing in-place expansion of conversation details. This involved removing modal-related HTML, CSS, and JavaScript, and adding new accordion styles.
+    - **Accordion UI/UX Improvements:**
+        - Increased the main content area width (`.main-wide`) for better use of screen space.
+        - Made conversation titles (`short_summary`) more prominent using `<h3>` tags.
+        - Added a chevron icon and a text fade-out effect to visually indicate expandability and hidden content in the accordion.
+    - **Markdown Rendering & Layout Debugging:**
+        - **Initial Markdown Parser Issue:** Identified that `marked.js` was not correctly rendering bullet points and tables, causing them to appear as broken "cells."
+        - **Library Swap Attempt:** Replaced `marked.js` with `markdown-it.js` to address markdown parsing inconsistencies.
+        - **Loading Issue & CDN Fix:** Discovered that `markdown-it.js` was not loading due to an incorrect CDN link (pointing to a Cloudflare login page). The CDN link was corrected to a valid jsDelivr URL.
+        - **CSS Conflict Resolution (User Implemented):** The persistent markdown formatting issues (bullet points as tables) were resolved by direct user intervention in `public/style.css` (lines 76-122). This fix correctly addresses the CSS conflicts that were preventing proper rendering of markdown-generated block elements within conversation list items.
+
+### Further Development (July 9, 2025)
+
+- **Bulk Actions Implementation:**
+    - Implemented bulk actions for both Todos and Facts pages, allowing users to delete, complete, confirm, or unconfirm multiple items at once.
+    - Added corresponding API endpoints (`/api/todos/bulk-delete`, `/api/todos/bulk-complete`, `/api/facts/bulk-delete`, `/api/facts/bulk-confirm`, `/api/facts/bulk-unconfirm`) and service functions.
+    - Included comprehensive logging on the backend to aid in debugging.
+- **Conversations Page:**
+    - Added pagination to the conversations page to improve performance and user experience when dealing with a large number of conversations.
+

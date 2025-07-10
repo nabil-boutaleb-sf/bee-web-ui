@@ -15,6 +15,8 @@ This document outlines the user stories and test cases for the Bee Web UI applic
 -   **As a user, I want to edit the text of a fact to correct or update it.**
 -   **As a user, I want to delete a fact to remove outdated information.**
 -   **As a user, I want to navigate through long lists of todos and facts using pagination.**
+-   **As a user, I want to see a list of suggested todos, separate from my main todo list, so I can discover new tasks.**
+-   **As a user, I want to be able to add a suggested todo to my main todo list, so I can act on it.**
 -   **As a developer, I want an independent test page to verify direct Bee API calls without using the app's main SDK service.**
 
 ## Test Cases
@@ -69,11 +71,25 @@ This document outlines the user stories and test cases for the Bee Web UI applic
     *   **Action:** Click the "Next" and "Previous" buttons below the fact lists.
     *   **Expected Result:** The list of facts updates to show the next or previous page of results.
 
+### Suggested Todos Page
+
+*   **Test Case 4.1: View Suggested Todos**
+    *   **Precondition:** The application is connected to the Bee API and there are suggested todos available.
+    *   **Action:** Navigate to a new "Suggestions" page or a "Suggestions" section on the Todos page.
+    *   **Expected Result:** The page displays a list of suggested todos, each with a description and an "Add" button. A loading message appears first.
+*   **Test Case 4.2: Add a Suggested Todo**
+    *   **Action:** Click the "Add" button on a suggested todo.
+    *   **Expected Result:** The suggested todo is removed from the suggestions list and appears in the "Incomplete Todos" list on the Todos page.
+*   **Test Case 4.3: No Suggested Todos**
+    *   **Precondition:** The application is connected to the Bee API but there are no suggested todos available.
+    *   **Action:** Navigate to the "Suggestions" page or section.
+    *   **Expected Result:** A message like "No new suggestions at the moment." is displayed.
+
 ### Test Page (Independent API)
 
-*   **Test Case 4.1: View Facts**
+*   **Test Case 5.1: View Facts**
     *   **Action:** Navigate to the Test page (`/test.html`).
     *   **Expected Result:** The page makes a direct call to the Bee API (via the `/test-api` proxy) and displays "Confirmed Facts" and "Unconfirmed Facts" in their respective sections.
-*   **Test Case 4.2: Breadcrumb Navigation**
+*   **Test Case 5.2: Breadcrumb Navigation**
     *   **Action:** Click the "Home" link in the breadcrumb navigation.
     *   **Expected Result:** The user is navigated back to the home page.

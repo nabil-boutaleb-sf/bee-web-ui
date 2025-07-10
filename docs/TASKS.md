@@ -2,21 +2,23 @@
 
 This document outlines the development tasks for the Bee Web UI project.
 
-## High Priority
+## Blocked Tasks
 - [ ] **Todos Page:**
-    - [ ] Separate todos into three sections: "Unconfirmed", "Incomplete", and "Completed".
+    - [ ] Separate todos into three sections: "Unconfirmed", "Incomplete", and "Completed". (Blocked by Bee.computer API clarification on "suggested todos")
 
 ## Medium Priority
+- [ ] **Investigate Suggested Todos API:** Test for a "suggestion" event via a WebSocket connection using the `websocket-test.js` script when a new suggestion is likely to be pushed by the server.
 - [ ] **Conversations Page:**
-    - [ ] Display conversation metadata (e.g., date, number of messages).
-    - [ ] Allow users to view the full content of a conversation.
+    - [x] Display conversation metadata (e.g., date, number of messages).
+    - [x] Allow users to view the full content of a conversation.
     - [ ] Implement a search or filter for conversations.
+- [x] **Integrate Markdown Reader/Editor Library:** Integrated `markdown-it` and resolved CSS conflicts to correctly render markdown content (bullet points, bold text, tables) in conversations.
 
 ## Low Priority
 - [ ] **General UI/UX:**
     - [ ] Add an inline creation form for new items (facts, todos).
     - [ ] Implement a search/filter for items on all pages.
-    - [ ] Implement bulk actions (e.g., delete, confirm).
+    - [x] Implement bulk actions (e.g., delete, confirm).
     - [ ] Display date/source information for items (if available from the API).
     - [ ] Improve the visual design and branding.
 
@@ -76,3 +78,5 @@ This document outlines the development tasks for the Bee Web UI project.
         -   [x] Add breadcrumbs to the test page.
 -   **Code Cleanup:**
     -   [x] Remove redundant and verbose logging from `services/beeService.js`.
+-   **API Investigation:**
+    -   [x] Contact Bee.computer developers to clarify how to access "suggested todos".

@@ -38,6 +38,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 300);
             });
         }
+        // Event listeners for bulk actions - Todos
+        document.getElementById('select-all-incomplete-todos')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'incomplete-todos-list'));
+        document.getElementById('bulk-delete-incomplete-todos')?.addEventListener('click', () => bulkDeleteTodos('incomplete'));
+        document.getElementById('bulk-complete-incomplete-todos')?.addEventListener('click', () => bulkCompleteTodos());
+
+        document.getElementById('select-all-completed-todos')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'completed-todos-list'));
+        document.getElementById('bulk-delete-completed-todos')?.addEventListener('click', () => bulkDeleteTodos('completed'));
     }
 
     // --- Facts Page (for facts.html) ---
@@ -54,6 +61,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 300);
             });
         }
+        // Event listeners for bulk actions - Facts
+        document.getElementById('select-all-confirmed-facts')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'confirmed-facts-list'));
+        document.getElementById('bulk-delete-confirmed-facts')?.addEventListener('click', () => bulkDeleteFacts('confirmed'));
+        document.getElementById('bulk-unconfirm-selected-facts')?.addEventListener('click', () => bulkUnconfirmFacts());
+
+        document.getElementById('select-all-unconfirmed-facts')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'unconfirmed-facts-list'));
+        document.getElementById('bulk-delete-unconfirmed-facts')?.addEventListener('click', () => bulkDeleteFacts('unconfirmed'));
+        document.getElementById('bulk-confirm-unconfirmed-facts')?.addEventListener('click', () => bulkConfirmFacts());
     }
 
     // --- Conversations Page (for conversations.html) ---
@@ -64,8 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             conversationSearchInput.addEventListener('input', () => {
                 clearTimeout(conversationSearchInput.searchTimeout);
                 conversationSearchInput.searchTimeout = setTimeout(() => {
-                    // Note: Conversations API doesn't have pagination in the current setup.
-                    // Search will filter all loaded conversations.
+                    currentPageConversations = 1;
                     loadConversations(conversationSearchInput.value);
                 }, 300);
             });
@@ -73,10 +87,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+let currentPageConversations = 1;
+const conversationsLimit = 10;
 
 let currentPageTodos = 1;
 const todosLimit = 10;
-let allTodos = []; // Cache for all todos to filter locally
 
 async function loadTodos(searchTerm = '') {
     const incompleteTodosList = document.getElementById('incomplete-todos-list');
@@ -84,38 +99,22 @@ async function loadTodos(searchTerm = '') {
     const todosContainer = document.getElementById('todos-container');
 
     try {
-        // Fetch all todos if not already cached or if it's the initial load without search
-        // If there's a search term, we assume the API supports it or we filter client-side.
-        // For this example, let's assume the API /api/todos does NOT support a search query parameter.
-        // So, we'll fetch all and filter client-side.
-        // A more robust solution would involve backend search.
-        if (allTodos.length === 0 || searchTerm === '') { // Simplified condition, might need refinement
-            const response = await fetch(`/api/todos?page=1&limit=1000`); // Fetch a large number to simulate getting all
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            allTodos = data.todos; // Cache them
+        const response = await fetch(`/api/todos?page=${currentPageTodos}&limit=${todosLimit}&search=${encodeURIComponent(searchTerm)}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        let todosToDisplay = allTodos;
-
-        if (searchTerm) {
-            todosToDisplay = allTodos.filter(todo => todo.text.toLowerCase().includes(searchTerm.toLowerCase()));
-        }
-
-        // Apply pagination to the filtered list
-        const startIndex = (currentPageTodos - 1) * todosLimit;
-        const endIndex = startIndex + todosLimit;
-        const paginatedTodos = todosToDisplay.slice(startIndex, endIndex);
-        const totalPages = Math.ceil(todosToDisplay.length / todosLimit) || 1;
-
+        const data = await response.json();
+        const todos = data.todos;
+        const totalPages = data.totalPages;
 
         incompleteTodosList.innerHTML = '';
         completedTodosList.innerHTML = '';
 
-        const incompleteTodos = paginatedTodos.filter(todo => !todo.completed);
-        const completedTodos = paginatedTodos.filter(todo => todo.completed);
+        document.getElementById('select-all-incomplete-todos') && (document.getElementById('select-all-incomplete-todos').checked = false);
+        document.getElementById('select-all-completed-todos') && (document.getElementById('select-all-completed-todos').checked = false);
+
+        const incompleteTodos = todos.filter(todo => !todo.completed);
+        const completedTodos = todos.filter(todo => todo.completed);
 
         if (incompleteTodos.length === 0) {
             incompleteTodosList.innerHTML = '<p>No incomplete todos found.</p>';
@@ -123,8 +122,18 @@ async function loadTodos(searchTerm = '') {
             const ul = document.createElement('ul');
             incompleteTodos.forEach(todo => {
                 const li = document.createElement('li');
-                li.textContent = todo.text;
                 li.dataset.todoId = todo.id;
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('todo-checkbox');
+                checkbox.dataset.todoId = todo.id;
+                li.appendChild(checkbox);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = todo.text;
+                textSpan.classList.add('item-text');
+                li.appendChild(textSpan);
 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
@@ -159,9 +168,19 @@ async function loadTodos(searchTerm = '') {
             const ul = document.createElement('ul');
             completedTodos.forEach(todo => {
                 const li = document.createElement('li');
-                li.textContent = todo.text;
                 li.dataset.todoId = todo.id;
                 li.classList.add('completed');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('todo-checkbox');
+                checkbox.dataset.todoId = todo.id;
+                li.appendChild(checkbox);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = todo.text;
+                textSpan.classList.add('item-text');
+                li.appendChild(textSpan);
 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
@@ -178,7 +197,6 @@ async function loadTodos(searchTerm = '') {
             completedTodosList.appendChild(ul);
         }
 
-        // Pagination for todos
         let paginationContainer = todosContainer.querySelector('.pagination-container');
         if (paginationContainer) {
             paginationContainer.remove();
@@ -217,6 +235,187 @@ async function loadTodos(searchTerm = '') {
     }
 }
 
+function toggleSelectAll(sourceCheckbox, listId) {
+    const listContainer = document.getElementById(listId);
+    if (!listContainer) return;
+    const checkboxes = listContainer.querySelectorAll('input[type="checkbox"].todo-checkbox, input[type="checkbox"].fact-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = sourceCheckbox.checked;
+    });
+}
+
+async function bulkDeleteTodos(type) {
+    const listId = type === 'incomplete' ? 'incomplete-todos-list' : 'completed-todos-list';
+    const listContainer = document.getElementById(listId);
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].todo-checkbox:checked'))
+        .map(cb => cb.dataset.todoId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one todo to delete.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected todo(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/todos/bulk-delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ todoIds: selectedIds })
+        });
+        if (response.ok) {
+            loadTodos(document.getElementById('todo-search')?.value || '');
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to delete selected todos: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk deleting todos:', error);
+        alert('Error bulk deleting todos.');
+    }
+}
+
+async function bulkCompleteTodos() {
+    const listContainer = document.getElementById('incomplete-todos-list');
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].todo-checkbox:checked'))
+        .map(cb => cb.dataset.todoId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one todo to complete.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to complete ${selectedIds.length} selected todo(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/todos/bulk-complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ todoIds: selectedIds })
+        });
+        if (response.ok) {
+            loadTodos(document.getElementById('todo-search')?.value || '');
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to complete selected todos: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk completing todos:', error);
+        alert('Error bulk completing todos.');
+    }
+}
+
+async function bulkDeleteFacts(type) {
+    const listId = type === 'confirmed' ? 'confirmed-facts-list' : 'unconfirmed-facts-list';
+    const listContainer = document.getElementById(listId);
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].fact-checkbox:checked'))
+        .map(cb => cb.dataset.factId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one fact to delete.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected fact(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/facts/bulk-delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ factIds: selectedIds })
+        });
+        if (response.ok) {
+            loadFacts(document.getElementById('fact-search')?.value || '');
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to delete selected facts: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk deleting facts:', error);
+        alert('Error bulk deleting facts.');
+    }
+}
+
+async function bulkConfirmFacts() {
+    const listContainer = document.getElementById('unconfirmed-facts-list');
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].fact-checkbox:checked'))
+        .map(cb => cb.dataset.factId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one fact to confirm.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to confirm ${selectedIds.length} selected fact(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/facts/bulk-confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ factIds: selectedIds })
+        });
+        if (response.ok) {
+            loadFacts(document.getElementById('fact-search')?.value || '');
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to confirm selected facts: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk confirming facts:', error);
+        alert('Error bulk confirming facts.');
+    }
+}
+
+async function bulkUnconfirmFacts() {
+    const listContainer = document.getElementById('confirmed-facts-list');
+    if (!listContainer) return;
+
+    const selectedIds = Array.from(listContainer.querySelectorAll('input[type="checkbox"].fact-checkbox:checked'))
+        .map(cb => cb.dataset.factId);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one fact to unconfirm.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to unconfirm ${selectedIds.length} selected fact(s)?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/facts/bulk-unconfirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ factIds: selectedIds })
+        });
+        if (response.ok) {
+            loadFacts(document.getElementById('fact-search')?.value || '');
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to unconfirm selected facts: ${errorData.message || response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error bulk unconfirming facts:', error);
+        alert('Error bulk unconfirming facts.');
+    }
+}
+
 async function completeTodo(todoId) {
     try {
         const response = await fetch(`/api/todos/${todoId}/complete`, { method: 'PUT' });
@@ -246,11 +445,11 @@ async function deleteTodo(todoId) {
 }
 
 function editTodo(li, todoId, currentText) {
-    const originalContent = li.innerHTML; // Save the original content
-    li.innerHTML = ''; // Clear the list item
+    const originalContent = li.innerHTML;
+    li.innerHTML = '';
 
     const form = document.createElement('form');
-    form.classList.add('edit-fact-form'); // Re-use the same style as facts
+    form.classList.add('edit-fact-form');
     form.onsubmit = (e) => {
         e.preventDefault();
         updateTodo(todoId, input.value);
@@ -276,8 +475,7 @@ function editTodo(li, todoId, currentText) {
     cancelButton.type = 'button';
     cancelButton.classList.add('icon-btn', 'delete-btn');
     cancelButton.onclick = () => {
-        li.innerHTML = originalContent; // Restore original content
-        // Re-attach event listeners
+        li.innerHTML = originalContent;
         const editButton = li.querySelector('.edit-btn');
         if (editButton) {
             editButton.onclick = () => editTodo(li, todoId, currentText);
@@ -320,9 +518,7 @@ async function updateTodo(todoId, text) {
 
 let currentPageConfirmed = 1;
 let currentPageUnconfirmed = 1;
-const limit = 10; // Used for pagination, not for initial fetch if searching
-let allConfirmedFacts = [];
-let allUnconfirmedFacts = [];
+const limit = 10;
 
 async function loadFacts(searchTerm = '') {
     await loadConfirmedFacts(searchTerm);
@@ -332,37 +528,36 @@ async function loadFacts(searchTerm = '') {
 async function loadConfirmedFacts(searchTerm = '') {
     const confirmedFactsList = document.getElementById('confirmed-facts-list');
     try {
-        if (allConfirmedFacts.length === 0 || searchTerm === '') { // Fetch only if cache is empty or no search
-            const response = await fetch(`/api/facts?confirmed=true&page=1&limit=1000`); // Fetch all
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            allConfirmedFacts = data.facts;
+        const response = await fetch(`/api/facts?confirmed=true&page=${currentPageConfirmed}&limit=${limit}&search=${encodeURIComponent(searchTerm)}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        let factsToDisplay = allConfirmedFacts;
-        if (searchTerm) {
-            factsToDisplay = allConfirmedFacts.filter(fact => fact.text.toLowerCase().includes(searchTerm.toLowerCase()));
-        }
-
-        // Apply pagination to the filtered list
-        const startIndex = (currentPageConfirmed - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedFacts = factsToDisplay.slice(startIndex, endIndex);
-        const totalPages = Math.ceil(factsToDisplay.length / limit) || 1;
+        const data = await response.json();
+        const facts = data.facts;
+        const totalPages = data.totalPages;
 
         confirmedFactsList.innerHTML = '';
+        document.getElementById('select-all-confirmed-facts') && (document.getElementById('select-all-confirmed-facts').checked = false);
 
-        if (paginatedFacts.length === 0) {
+        if (facts.length === 0) {
             confirmedFactsList.innerHTML = searchTerm ? '<p>No confirmed facts match your search.</p>' : '<p>No confirmed facts found.</p>';
         } else {
             const ul = document.createElement('ul');
-            paginatedFacts.forEach(fact => {
+            facts.forEach(fact => {
                 const li = document.createElement('li');
-                li.textContent = fact.text;
                 li.dataset.factId = fact.id;
                 li.classList.add('confirmed');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('fact-checkbox');
+                checkbox.dataset.factId = fact.id;
+                li.appendChild(checkbox);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = fact.text;
+                textSpan.classList.add('item-text');
+                li.appendChild(textSpan);
 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
@@ -391,7 +586,6 @@ async function loadConfirmedFacts(searchTerm = '') {
             confirmedFactsList.appendChild(ul);
         }
 
-        // Pagination for confirmed facts
         const paginationContainer = document.createElement('div');
         paginationContainer.classList.add('pagination-container');
 
@@ -428,37 +622,36 @@ async function loadConfirmedFacts(searchTerm = '') {
 async function loadUnconfirmedFacts(searchTerm = '') {
     const unconfirmedFactsList = document.getElementById('unconfirmed-facts-list');
     try {
-        if (allUnconfirmedFacts.length === 0 || searchTerm === '') { // Fetch only if cache is empty or no search
-            const response = await fetch(`/api/facts?confirmed=false&page=1&limit=1000`); // Fetch all
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            allUnconfirmedFacts = data.facts;
+        const response = await fetch(`/api/facts?confirmed=false&page=${currentPageUnconfirmed}&limit=${limit}&search=${encodeURIComponent(searchTerm)}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        let factsToDisplay = allUnconfirmedFacts;
-        if (searchTerm) {
-            factsToDisplay = allUnconfirmedFacts.filter(fact => fact.text.toLowerCase().includes(searchTerm.toLowerCase()));
-        }
-
-        // Apply pagination to the filtered list
-        const startIndex = (currentPageUnconfirmed - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedFacts = factsToDisplay.slice(startIndex, endIndex);
-        const totalPages = Math.ceil(factsToDisplay.length / limit) || 1;
+        const data = await response.json();
+        const facts = data.facts;
+        const totalPages = data.totalPages;
 
         unconfirmedFactsList.innerHTML = '';
+        document.getElementById('select-all-unconfirmed-facts') && (document.getElementById('select-all-unconfirmed-facts').checked = false);
 
-        if (paginatedFacts.length === 0) {
+        if (facts.length === 0) {
             unconfirmedFactsList.innerHTML = searchTerm ? '<p>No unconfirmed facts match your search.</p>' : '<p>No unconfirmed facts found.</p>';
         } else {
             const ul = document.createElement('ul');
-            paginatedFacts.forEach(fact => {
+            facts.forEach(fact => {
                 const li = document.createElement('li');
-                li.textContent = fact.text;
                 li.dataset.factId = fact.id;
                 li.classList.add('unconfirmed');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('fact-checkbox');
+                checkbox.dataset.factId = fact.id;
+                li.appendChild(checkbox);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = fact.text;
+                textSpan.classList.add('item-text');
+                li.appendChild(textSpan);
 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
@@ -487,7 +680,6 @@ async function loadUnconfirmedFacts(searchTerm = '') {
             unconfirmedFactsList.appendChild(ul);
         }
 
-        // Pagination for unconfirmed facts
         const paginationContainer = document.createElement('div');
         paginationContainer.classList.add('pagination-container');
 
@@ -584,8 +776,8 @@ async function updateFact(factId, text) {
 }
 
 function editFact(li, factId, currentText) {
-    const originalContent = li.innerHTML; // Save the original content
-    li.innerHTML = ''; // Clear the list item
+    const originalContent = li.innerHTML;
+    li.innerHTML = '';
 
     const form = document.createElement('form');
     form.classList.add('edit-fact-form');
@@ -614,8 +806,7 @@ function editFact(li, factId, currentText) {
     cancelButton.type = 'button';
     cancelButton.classList.add('icon-btn', 'delete-btn');
     cancelButton.onclick = () => {
-        li.innerHTML = originalContent; // Restore original content
-        // Re-attach event listeners
+        li.innerHTML = originalContent;
         const editButton = li.querySelector('.edit-btn');
         if (editButton) {
             editButton.onclick = () => editFact(li, factId, currentText);
@@ -640,16 +831,16 @@ function editFact(li, factId, currentText) {
     input.focus();
 }
 
-let allConversations = []; // Cache for all conversations
-
 async function loadConversations(searchTerm = '') {
     const conversationsContainer = document.getElementById('conversations-container');
     try {
-        const response = await fetch(`/api/conversations?search=${encodeURIComponent(searchTerm)}`);
+        const response = await fetch(`/api/conversations?page=${currentPageConversations}&limit=${conversationsLimit}&search=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const conversations = await response.json();
+        const data = await response.json();
+        const conversations = data.conversations;
+        const totalPages = data.totalPages;
 
         conversationsContainer.innerHTML = '';
 
@@ -659,7 +850,6 @@ async function loadConversations(searchTerm = '') {
             const ul = document.createElement('ul');
             conversations.forEach(conversation => {
                 const li = document.createElement('li');
-                // Re-create the accordion structure from previous work
                 li.classList.add('conversation-item');
                 li.dataset.conversationId = conversation.id;
 
@@ -670,15 +860,86 @@ async function loadConversations(searchTerm = '') {
                 title.textContent = conversation.short_summary || 'Conversation';
                 triggerContainer.appendChild(title);
 
-                // Add other metadata if needed, like state or time
+                const state = document.createElement('p');
+                state.textContent = `State: ${conversation.state}`;
+                triggerContainer.appendChild(state);
+
+                const timeInfo = document.createElement('p');
+                const startTime = new Date(conversation.start_time).toLocaleString();
+                const endTime = conversation.end_time ? new Date(conversation.end_time).toLocaleString() : 'Ongoing';
+                timeInfo.textContent = `Time: ${startTime} - ${endTime}`;
+                triggerContainer.appendChild(timeInfo);
 
                 li.appendChild(triggerContainer);
+
+                const panel = document.createElement('div');
+                panel.classList.add('accordion-panel');
+                panel.innerHTML = (typeof markdownit === 'function' ? markdownit().render(conversation.summary || 'No detailed content available.') : (conversation.summary || 'No detailed content available.'));
+
+                if (conversation.state !== 'CAPTURING') {
+                    const icon = document.createElement('span');
+                    icon.classList.add('accordion-icon');
+                    icon.innerHTML = '&#8250;';
+                    li.appendChild(icon);
+                    li.appendChild(panel);
+
+                    li.addEventListener('click', (e) => {
+                        if (e.target.tagName === 'A' && panel.contains(e.target)) {
+                            return;
+                        }
+                        li.classList.toggle('active');
+                        const currentPanel = li.querySelector('.accordion-panel');
+                        if (currentPanel.style.maxHeight) {
+                            currentPanel.style.maxHeight = null;
+                        } else {
+                            currentPanel.style.maxHeight = currentPanel.scrollHeight + "px";
+                        }
+                    });
+                } else {
+                    li.style.cursor = 'default';
+                }
                 ul.appendChild(li);
             });
             conversationsContainer.appendChild(ul);
         }
+
+        let paginationContainer = conversationsContainer.parentNode.querySelector('.pagination-container');
+        if (paginationContainer) {
+            paginationContainer.remove();
+        }
+        paginationContainer = document.createElement('div');
+        paginationContainer.classList.add('pagination-container');
+
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.disabled = currentPageConversations === 1;
+        prevButton.onclick = () => {
+            if (currentPageConversations > 1) {
+                currentPageConversations--;
+                loadConversations(document.getElementById('conversation-search')?.value || '');
+            }
+        };
+        paginationContainer.appendChild(prevButton);
+
+        const pageInfo = document.createElement('span');
+        pageInfo.textContent = `Page ${currentPageConversations} of ${totalPages || 1}`;
+        paginationContainer.appendChild(pageInfo);
+
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.disabled = currentPageConversations >= (totalPages || 1);
+        nextButton.onclick = () => {
+            if (currentPageConversations < (totalPages || 1)) {
+                currentPageConversations++;
+                loadConversations(document.getElementById('conversation-search')?.value || '');
+            }
+        };
+        paginationContainer.appendChild(nextButton);
+
+        conversationsContainer.parentNode.insertBefore(paginationContainer, conversationsContainer.nextSibling);
+
     } catch (error) {
         console.error('Failed to load conversations:', error);
-        conversationsContainer.innerHTML = '<p>Error loading conversations. Check the console for details.</p>';
+        conversationsContainer.innerHTML = `<p style="color: red;">Error: ${error.message}</p><p>Could not load conversations. Check the console for more details.</p>`;
     }
 }

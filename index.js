@@ -164,12 +164,74 @@ app.put('/api/facts/:id', async (req, res) => {
 // Endpoint to get conversations
 app.get('/api/conversations', async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         const searchTerm = req.query.search || '';
-        const conversations = await beeService.getConversations(searchTerm);
-        res.json(conversations);
+        const conversationsData = await beeService.getConversations(page, limit, searchTerm);
+        res.json(conversationsData);
     } catch (error) {
         console.error('Error fetching conversations:', error.message);
         res.status(500).json({ message: error.message });
+    }
+});
+
+// Endpoint to bulk delete todos
+app.post('/api/todos/bulk-delete', async (req, res) => {
+    try {
+        const { todoIds } = req.body;
+        await beeService.bulkDeleteTodos(todoIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk deleting todos:', error);
+        res.status(500).json({ message: 'Failed to bulk delete todos.' });
+    }
+});
+
+// Endpoint to bulk complete todos
+app.post('/api/todos/bulk-complete', async (req, res) => {
+    try {
+        const { todoIds } = req.body;
+        await beeService.bulkCompleteTodos(todoIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk completing todos:', error);
+        res.status(500).json({ message: 'Failed to bulk complete todos.' });
+    }
+});
+
+// Endpoint to bulk delete facts
+app.post('/api/facts/bulk-delete', async (req, res) => {
+    try {
+        const { factIds } = req.body;
+        await beeService.bulkDeleteFacts(factIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk deleting facts:', error);
+        res.status(500).json({ message: 'Failed to bulk delete facts.' });
+    }
+});
+
+// Endpoint to bulk confirm facts
+app.post('/api/facts/bulk-confirm', async (req, res) => {
+    try {
+        const { factIds } = req.body;
+        await beeService.bulkConfirmFacts(factIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk confirming facts:', error);
+        res.status(500).json({ message: 'Failed to bulk confirm facts.' });
+    }
+});
+
+// Endpoint to bulk unconfirm facts
+app.post('/api/facts/bulk-unconfirm', async (req, res) => {
+    try {
+        const { factIds } = req.body;
+        await beeService.bulkUnconfirmFacts(factIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk unconfirming facts:', error);
+        res.status(500).json({ message: 'Failed to bulk unconfirm facts.' });
     }
 });
 

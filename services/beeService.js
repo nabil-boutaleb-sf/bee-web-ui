@@ -96,12 +96,11 @@ async function updateFact(factId, text) {
   }
 }
 
-async function getConversations(searchTerm = '') {
+async function getConversations(page = 1, limit = 10, searchTerm = '') {
   try {
-    // The SDK likely doesn't support a direct search term.
-    // We fetch all and filter, which is what the frontend was trying to do.
-    // A more robust solution would be to paginate and search on the backend if the API allowed it.
-    const response = await bee.getConversations('me');
+    // Fetch all conversations and then filter and paginate on the server.
+    // This is not ideal for performance, but the SDK may not support server-side search/pagination.
+    const response = await bee.getConversations('me', { limit: 1000 }); // Fetch a large number
     let conversations = response.conversations;
 
     if (searchTerm) {
@@ -110,11 +109,48 @@ async function getConversations(searchTerm = '') {
         (conv.short_summary && conv.short_summary.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-    return conversations;
+
+    const totalPages = Math.ceil(conversations.length / limit);
+    const paginatedConversations = conversations.slice((page - 1) * limit, page * limit);
+
+    return {
+      conversations: paginatedConversations,
+      totalPages: totalPages
+    };
   } catch (error) {
     console.error('Error fetching conversations from Bee AI SDK:', error.message);
     throw new Error('Failed to fetch conversations from Bee AI SDK.');
   }
+}
+
+async function bulkDeleteTodos(todoIds) {
+    for (const todoId of todoIds) {
+        await deleteTodo(todoId);
+    }
+}
+
+async function bulkCompleteTodos(todoIds) {
+    for (const todoId of todoIds) {
+        await completeTodo(todoId);
+    }
+}
+
+async function bulkDeleteFacts(factIds) {
+    for (const factId of factIds) {
+        await deleteFact(factId);
+    }
+}
+
+async function bulkConfirmFacts(factIds) {
+    for (const factId of factIds) {
+        await confirmFact(factId);
+    }
+}
+
+async function bulkUnconfirmFacts(factIds) {
+    for (const factId of factIds) {
+        await unconfirmFact(factId);
+    }
 }
 
 module.exports = {
@@ -128,5 +164,10 @@ module.exports = {
   unconfirmFact,
   updateFact,
   getConversations,
-  updateTodo
+  updateTodo,
+  bulkDeleteTodos,
+  bulkCompleteTodos,
+  bulkDeleteFacts,
+  bulkConfirmFacts,
+  bulkUnconfirmFacts
 };

@@ -18,6 +18,12 @@ main {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
+/* Wider container for content-heavy pages */
+.main-wide {
+    max-width: calc(100% - 40px); /* Nearly full-width with 20px margin on each side */
+    margin: 2rem 20px;
+}
+
 /* Headings */
 h1 {
     font-size: 2.5rem;
@@ -47,6 +53,96 @@ li {
 
 li:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Remove hover effect for elements inside the accordion panel */
+.accordion-panel li:hover,
+.accordion-panel table:hover {
+    box-shadow: none;
+    cursor: default;
+}
+
+/* Table Styles */
+.accordion-panel table, .summary-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    box-shadow: none; /* Ensure no shadow on tables */
+}
+.accordion-panel table:hover {
+    box-shadow: none;
+}
+
+/* Styles for markdown-generated content within the accordion panel */
+.accordion-panel ul {
+    list-style: disc; /* Standard disc bullets */
+    padding-left: 20px; /* Indentation for the list */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.accordion-panel ol {
+    list-style: decimal; /* Standard numbered list */
+    padding-left: 20px; /* Indentation for the list */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.accordion-panel li {
+    display: list-item; /* Crucial for correct bullet/number rendering */
+    background-color: transparent; /* Remove any inherited background from global li */
+    border: none; /* Remove any inherited border */
+    padding: 0.2em 0; /* Minimal padding for list items */
+    margin-bottom: 0.3em; /* Spacing between list items */
+    /* Resetting properties that might be inherited from the global 'li' style */
+    justify-content: initial;
+    align-items: initial;
+}
+
+.accordion-panel li:hover {
+    box-shadow: none; /* Ensure no hover effect on markdown list items */
+    cursor: default;
+}
+
+.accordion-panel p {
+    margin-bottom: 0.5em;
+}
+
+.accordion-panel h1,
+.accordion-panel h2,
+.accordion-panel h3,
+.accordion-panel h4,
+.accordion-panel h5,
+.accordion-panel h6 {
+    margin-top: 0.8em;
+    margin-bottom: 0.4em;
+    border-bottom: none; /* Remove heading borders inherited from global h1 if any */
+    padding-bottom: 0;
+}
+
+
+.accordion-panel th, .accordion-panel td,
+.summary-preview th, .summary-preview td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.accordion-panel th, .summary-preview th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+
+/* Conversation List Item Specifics */
+.conversation-item {
+    display: block; /* Override display:flex from the global li style */
+    cursor: pointer;
+    position: relative; /* For positioning the icon */
+}
+
+.conversation-item .trigger-container {
+    width: calc(100% - 30px); /* Leave space for the icon */
 }
 
 /* Fact Status Styles */
@@ -199,4 +295,155 @@ nav a:hover {
     border: 1px solid #ccc;
     border-radius: 6px;
     box-sizing: border-box; /* Ensures padding doesn't affect width */
+}
+
+/* Accordion Styles */
+.conversation-item {
+    cursor: pointer;
+    position: relative; /* For positioning the icon */
+    /* No flex properties here to allow natural block-level rendering */
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.conversation-item .trigger-container {
+    width: calc(100% - 30px); /* Leave space for the icon */
+}
+
+.accordion-icon {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ccc;
+    transition: transform 0.3s ease-out;
+}
+
+.conversation-item.active .accordion-icon {
+    transform: rotate(90deg);
+}
+
+.summary-preview {
+    position: relative;
+    max-height: 150px; /* Limit preview height */
+    overflow: hidden;
+}
+
+.summary-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: linear-gradient(to bottom, transparent, white);
+    pointer-events: none; /* Allows clicking through the fade */
+}
+
+.conversation-item.active .summary-preview {
+    max-height: none; /* Remove height limit when active */
+}
+
+.conversation-item.active .summary-preview::after {
+    display: none; /* Hide fade when active */
+}
+
+.accordion-panel {
+    padding: 1rem;
+    background-color: #f9f9f9;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    border-top: 1px solid #eee;
+    margin-top: 1rem;
+    width: 100%; /* Ensure panel takes full width */
+}
+
+/* Styling for bulk action containers */
+.bulk-actions-container {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between elements */
+}
+
+.bulk-actions-container input[type="checkbox"] {
+    margin-right: 5px;
+    height: 18px; /* Taller checkbox */
+    width: 18px; /* Wider checkbox */
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.bulk-actions-container button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.bulk-actions-container button:hover {
+    background-color: #0056b3;
+}
+
+/* Styling for individual item checkboxes */
+li input[type="checkbox"].todo-checkbox,
+li input[type="checkbox"].fact-checkbox {
+    margin-right: 10px;
+    cursor: pointer;
+    height: 16px; /* Taller checkbox */
+    width: 16px; /* Wider checkbox */
+    vertical-align: middle; /* Align with text */
+}
+
+/* Adjust list item display to accommodate checkbox and buttons */
+/* The existing 'li' style already uses flex, so we just need to ensure
+   the children are spaced correctly. */
+
+li .item-text {
+    flex-grow: 1; /* Allow text to take available space */
+    margin-right: 10px; /* Space between text and buttons */
+    margin-left: 5px; /* Give a little space after the checkbox */
+}
+
+/* Ensure that the edit form within a list item also behaves well with flex */
+/* The existing 'edit-fact-form' style already uses flex.
+   We might want to adjust input width if needed. */
+li form.edit-fact-form input.edit-fact-input {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+/* Pagination container styles */
+.pagination-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-container button {
+    margin: 0 5px;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination-container button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.pagination-container span {
+    margin: 0 10px;
+    font-size: 1em;
 }
