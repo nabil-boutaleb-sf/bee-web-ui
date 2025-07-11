@@ -33,7 +33,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Debounce search to avoid excessive API calls
                 clearTimeout(todoSearchInput.searchTimeout);
                 todoSearchInput.searchTimeout = setTimeout(() => {
-                    currentPageTodos = 1; // Reset to first page for new search
+                    // No need to set currentPageIncompleteTodos and currentPageCompletedTodos here
+                    // as loadTodos() with a changed search term will reset them.
                     loadTodos(todoSearchInput.value);
                 }, 300);
             });
@@ -90,54 +91,124 @@ document.addEventListener('DOMContentLoaded', async () => {
 let currentPageConversations = 1;
 const conversationsLimit = 10;
 
-let currentPageTodos = 1;
-const todosLimit = 10;
+// Todo state variables
+const todosLimit = 10; // Items per page for each list
+let currentPageIncompleteTodos = 1;
+let totalPagesIncomplete = 1;
+let allIncompleteTodos = [];
+
+let currentPageCompletedTodos = 1;
+let totalPagesCompleted = 1;
+let allCompletedTodos = [];
+
 
 async function loadTodos(searchTerm = '') {
-    const incompleteTodosList = document.getElementById('incomplete-todos-list');
-    const completedTodosList = document.getElementById('completed-todos-list');
-    const todosContainer = document.getElementById('todos-container');
+    const incompleteTodosListDiv = document.getElementById('incomplete-todos-list');
+    const completedTodosListDiv = document.getElementById('completed-todos-list');
+
+    // When loading (e.g., initial load or search), reset current pages
+    if (searchTermChanged(searchTerm) || arguments.length === 0) { // argument.length === 0 implies initial load
+        currentPageIncompleteTodos = 1;
+        currentPageCompletedTodos = 1;
+    }
 
     try {
-        const response = await fetch(`/api/todos?page=${currentPageTodos}&limit=${todosLimit}&search=${encodeURIComponent(searchTerm)}`);
+        // Fetch ALL todos from the backend (or a sufficiently large number)
+        // The backend's beeService already fetches up to 1000 of each type.
+        // We pass a large limit to our own API endpoint to ensure it returns all those.
+        const response = await fetch(`/api/todos?page=1&limit=2000&search=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        const todos = data.todos;
-        const totalPages = data.totalPages;
+        const fetchedTodos = data.todos || [];
 
-        incompleteTodosList.innerHTML = '';
-        completedTodosList.innerHTML = '';
+        // Filter into allIncompleteTodos and allCompletedTodos
+        allIncompleteTodos = fetchedTodos.filter(todo => !todo.completed);
+        allCompletedTodos = fetchedTodos.filter(todo => todo.completed);
 
-        document.getElementById('select-all-incomplete-todos') && (document.getElementById('select-all-incomplete-todos').checked = false);
-        document.getElementById('select-all-completed-todos') && (document.getElementById('select-all-completed-todos').checked = false);
+        // Update total pages for each list
+        totalPagesIncomplete = Math.ceil(allIncompleteTodos.length / todosLimit) || 1;
+        totalPagesCompleted = Math.ceil(allCompletedTodos.length / todosLimit) || 1;
 
-        const incompleteTodos = todos.filter(todo => !todo.completed);
-        const completedTodos = todos.filter(todo => todo.completed);
+        // Ensure current pages are not out of bounds after filtering/searching
+        currentPageIncompleteTodos = Math.min(currentPageIncompleteTodos, totalPagesIncomplete);
+        currentPageCompletedTodos = Math.min(currentPageCompletedTodos, totalPagesCompleted);
 
-        if (incompleteTodos.length === 0) {
-            incompleteTodosList.innerHTML = '<p>No incomplete todos found.</p>';
-        } else {
-            const ul = document.createElement('ul');
-            incompleteTodos.forEach(todo => {
-                const li = document.createElement('li');
-                li.dataset.todoId = todo.id;
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.classList.add('todo-checkbox');
-                checkbox.dataset.todoId = todo.id;
-                li.appendChild(checkbox);
+        renderTodoLists();
 
-                const textSpan = document.createElement('span');
-                textSpan.textContent = todo.text;
-                textSpan.classList.add('item-text');
-                li.appendChild(textSpan);
+    } catch (error) {
+        console.error('Failed to load todos:', error);
+        incompleteTodosListDiv.innerHTML = '<p>Error loading incomplete todos. Check the console for details.</p>';
+        completedTodosListDiv.innerHTML = '<p>Error loading completed todos. Check the console for details.</p>';
+    }
+}
 
-                const buttonContainer = document.createElement('div');
-                buttonContainer.classList.add('button-container');
+let lastSearchTermTodos = '';
+function searchTermChanged(currentSearchTerm) {
+    if (currentSearchTerm !== lastSearchTermTodos) {
+        lastSearchTermTodos = currentSearchTerm;
+        return true;
+    }
+    return false;
+}
 
+function renderTodoLists() {
+    renderSpecificTodoList(
+        allIncompleteTodos,
+        'incomplete-todos-list',
+        currentPageIncompleteTodos,
+        totalPagesIncomplete,
+        'incomplete',
+        false
+    );
+    renderSpecificTodoList(
+        allCompletedTodos,
+        'completed-todos-list',
+        currentPageCompletedTodos,
+        totalPagesCompleted,
+        'completed',
+        true
+    );
+}
+
+function renderSpecificTodoList(todos, listId, currentPage, totalPages, type, isCompletedList) {
+    const listContainer = document.getElementById(listId);
+    listContainer.innerHTML = ''; // Clear previous content (important for re-renders)
+
+    document.getElementById(`select-all-${type}-todos`) && (document.getElementById(`select-all-${type}-todos`).checked = false);
+
+    const startIndex = (currentPage - 1) * todosLimit;
+    const endIndex = startIndex + todosLimit;
+    const paginatedTodos = todos.slice(startIndex, endIndex);
+
+    if (paginatedTodos.length === 0) {
+        listContainer.innerHTML = `<p>No ${type} todos found.</p>`;
+    } else {
+        const ul = document.createElement('ul');
+        paginatedTodos.forEach(todo => {
+            const li = document.createElement('li');
+            li.dataset.todoId = todo.id;
+            if (isCompletedList) {
+                li.classList.add('completed');
+            }
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('todo-checkbox');
+            checkbox.dataset.todoId = todo.id;
+            li.appendChild(checkbox);
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = todo.text;
+            textSpan.classList.add('item-text');
+            li.appendChild(textSpan);
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.classList.add('button-container');
+
+            if (!isCompletedList) {
                 const completeButton = document.createElement('button');
                 completeButton.innerHTML = '<i class="fas fa-check"></i>';
                 completeButton.classList.add('icon-btn', 'confirm-btn');
@@ -149,90 +220,83 @@ async function loadTodos(searchTerm = '') {
                 editButton.classList.add('icon-btn', 'edit-btn');
                 editButton.onclick = () => editTodo(li, todo.id, todo.text);
                 buttonContainer.appendChild(editButton);
+            }
 
-                const deleteButton = document.createElement('button');
-                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-                deleteButton.classList.add('icon-btn', 'delete-btn');
-                deleteButton.onclick = () => deleteTodo(todo.id);
-                buttonContainer.appendChild(deleteButton);
+            const deleteButton = document.createElement('button');
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteButton.classList.add('icon-btn', 'delete-btn');
+            deleteButton.onclick = () => deleteTodo(todo.id);
+            buttonContainer.appendChild(deleteButton);
 
-                li.appendChild(buttonContainer);
-                ul.appendChild(li);
-            });
-            incompleteTodosList.appendChild(ul);
-        }
-
-        if (completedTodos.length === 0) {
-            completedTodosList.innerHTML = '<p>No completed todos found.</p>';
-        } else {
-            const ul = document.createElement('ul');
-            completedTodos.forEach(todo => {
-                const li = document.createElement('li');
-                li.dataset.todoId = todo.id;
-                li.classList.add('completed');
-
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.classList.add('todo-checkbox');
-                checkbox.dataset.todoId = todo.id;
-                li.appendChild(checkbox);
-
-                const textSpan = document.createElement('span');
-                textSpan.textContent = todo.text;
-                textSpan.classList.add('item-text');
-                li.appendChild(textSpan);
-
-                const buttonContainer = document.createElement('div');
-                buttonContainer.classList.add('button-container');
-
-                const deleteButton = document.createElement('button');
-                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-                deleteButton.classList.add('icon-btn', 'delete-btn');
-                deleteButton.onclick = () => deleteTodo(todo.id);
-                buttonContainer.appendChild(deleteButton);
-
-                li.appendChild(buttonContainer);
-                ul.appendChild(li);
-            });
-            completedTodosList.appendChild(ul);
-        }
-
-        let paginationContainer = todosContainer.querySelector('.pagination-container');
-        if (paginationContainer) {
-            paginationContainer.remove();
-        }
-        paginationContainer = document.createElement('div');
-        paginationContainer.classList.add('pagination-container');
-
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.disabled = currentPageTodos === 1;
-        prevButton.onclick = () => {
-            currentPageTodos--;
-            loadTodos(document.getElementById('todo-search')?.value || '');
-        };
-        paginationContainer.appendChild(prevButton);
-
-        const pageInfo = document.createElement('span');
-        pageInfo.textContent = `Page ${currentPageTodos} of ${totalPages}`;
-        paginationContainer.appendChild(pageInfo);
-
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.disabled = currentPageTodos >= totalPages;
-        nextButton.onclick = () => {
-            currentPageTodos++;
-            loadTodos(document.getElementById('todo-search')?.value || '');
-        };
-        paginationContainer.appendChild(nextButton);
-
-        todosContainer.appendChild(paginationContainer);
-
-    } catch (error) {
-        console.error('Failed to load todos:', error);
-        incompleteTodosList.innerHTML = '<p>Error loading incomplete todos. Check the console for details.</p>';
-        completedTodosList.innerHTML = '<p>Error loading completed todos. Check the console for details.</p>';
+            li.appendChild(buttonContainer);
+            ul.appendChild(li);
+        });
+        listContainer.appendChild(ul);
     }
+
+    // Remove old pagination for this specific list if it exists within its dedicated placeholder
+    const paginationPlaceholderId = `${type}-todos-pagination`;
+    const paginationPlaceholder = document.getElementById(paginationPlaceholderId);
+    if (paginationPlaceholder) {
+        paginationPlaceholder.innerHTML = ''; // Clear any existing pagination
+    } else {
+        console.error(`Pagination placeholder ${paginationPlaceholderId} not found.`);
+        return; // Don't proceed if placeholder is missing
+    }
+
+    // Create and append new pagination controls
+    createPaginationControls(listType, currentPage, totalPages, paginationPlaceholder);
+}
+
+
+function createPaginationControls(listType, currentPage, totalPages, appendToElement) {
+    // appendToElement is now the specific placeholder div.
+    // The old logic of creating a new div and adding classes is still valid,
+    // it will just be appended into the placeholder.
+    const paginationContainer = document.createElement('div');
+    paginationContainer.classList.add('pagination-container'); // General class for styling
+
+    const prevButton = document.createElement('button');
+    prevButton.textContent = 'Previous';
+    prevButton.disabled = currentPage === 1;
+    prevButton.onclick = () => {
+        if (listType === 'incomplete') {
+            if (currentPageIncompleteTodos > 1) {
+                currentPageIncompleteTodos--;
+                renderTodoLists();
+            }
+        } else if (listType === 'completed') {
+            if (currentPageCompletedTodos > 1) {
+                currentPageCompletedTodos--;
+                renderTodoLists();
+            }
+        }
+    };
+    paginationContainer.appendChild(prevButton);
+
+    const pageInfo = document.createElement('span');
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    paginationContainer.appendChild(pageInfo);
+
+    const nextButton = document.createElement('button');
+    nextButton.textContent = 'Next';
+    nextButton.disabled = currentPage >= totalPages;
+    nextButton.onclick = () => {
+        if (listType === 'incomplete') {
+            if (currentPageIncompleteTodos < totalPagesIncomplete) {
+                currentPageIncompleteTodos++;
+                renderTodoLists();
+            }
+        } else if (listType === 'completed') {
+            if (currentPageCompletedTodos < totalPagesCompleted) {
+                currentPageCompletedTodos++;
+                renderTodoLists();
+            }
+        }
+    };
+    paginationContainer.appendChild(nextButton);
+
+    appendToElement.appendChild(paginationContainer);
 }
 
 function toggleSelectAll(sourceCheckbox, listId) {
