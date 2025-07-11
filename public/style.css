@@ -26,7 +26,6 @@ main {
 
 /* Headings */
 h1 {
-
     font-size: 2.5rem;
     color: #1c1e21;
     border-bottom: 2px solid #e7e7e7;
@@ -282,6 +281,20 @@ nav a:hover {
 .cancel-btn {
     background-color: #6c757d;
     color: white;
+}
+
+/* Search Bar Styles */
+.search-container {
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
 }
 
 /* Accordion Styles */

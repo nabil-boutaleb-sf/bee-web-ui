@@ -10,7 +10,9 @@ router.get('/facts', async (req, res) => {
         const confirmed = req.query.confirmed === 'true';
         const response = await axios.get(`${BEE_API_BASE_URL}/me/facts`, {
             params: {
-                confirmed
+                confirmed,
+                page: 1,
+                limit: 1000 // Fetch a large number to get all facts
             },
             headers: {
                 'x-api-key': BEE_API_TOKEN

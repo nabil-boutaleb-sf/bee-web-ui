@@ -20,10 +20,37 @@ async function confirmFact(factId) {
   }
 }
 
-async function getTodos(page = 1, limit = 10) {
+async function getTodos(page = 1, limit = 10, searchTerm = '') {
   try {
-    const response = await bee.getTodos('me', { page, limit });
-    return response;
+    // The beeai SDK doesn't support filtering by text, so we fetch all todos
+    // and filter them on the server. We fetch both complete and incomplete.
+    const incompletePromise = bee.getTodos('me', { completed: false, limit: 1000 });
+    const completedPromise = bee.getTodos('me', { completed: true, limit: 1000 });
+
+    const [incompleteResponse, completedResponse] = await Promise.all([
+      incompletePromise,
+      completedPromise,
+    ]);
+
+    let allTodos = [
+      ...(incompleteResponse.todos || []),
+      ...(completedResponse.todos || []),
+    ];
+
+    if (searchTerm) {
+      allTodos = allTodos.filter(todo =>
+        todo.text.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Now, paginate the filtered results
+    const totalPages = Math.ceil(allTodos.length / limit);
+    const paginatedTodos = allTodos.slice((page - 1) * limit, page * limit);
+
+    return {
+      todos: paginatedTodos,
+      totalPages,
+    };
   } catch (error) {
     console.error('Error fetching todos from Bee AI SDK:', error.message);
     throw new Error('Failed to fetch todos from Bee AI SDK.');
@@ -41,10 +68,26 @@ async function checkAuthStatus() {
   }
 }
 
-async function getFacts(confirmed, page = 1, limit = 10) {
+async function getFacts(confirmed, page = 1, limit = 10, searchTerm = '') {
   try {
-    const facts = await bee.getFacts('me', { confirmed, page, limit });
-    return facts;
+    // Fetch all facts for the given 'confirmed' state, then filter by search term.
+    const response = await bee.getFacts('me', { confirmed, page: 1, limit: 1000 });
+    let facts = response.facts || [];
+
+    if (searchTerm) {
+      facts = facts.filter(fact =>
+        fact.text.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Paginate the filtered results.
+    const totalPages = Math.ceil(facts.length / limit);
+    const paginatedFacts = facts.slice((page - 1) * limit, page * limit);
+
+    return {
+      facts: paginatedFacts,
+      totalPages: totalPages,
+    };
   } catch (error) {
     console.error('Error fetching facts from Bee AI SDK:', error.message);
     throw new Error('Failed to fetch facts from Bee AI SDK.');
@@ -96,15 +139,59 @@ async function updateFact(factId, text) {
   }
 }
 
-async function getConversations(page = 1, limit = 10) {
+async function getConversations(page = 1, limit = 10, searchTerm = '') {
   try {
-    // Assuming the SDK supports pagination similar to getTodos and getFacts
-    const response = await bee.getConversations('me', { page, limit });
-    return response; // Return the whole response object
+    const response = await bee.getConversations('me', { limit: 1000 }); // Fetch a large number
+    let conversations = response.conversations || [];
+
+    if (searchTerm) {
+      conversations = conversations.filter(conv =>
+        (conv.summary && conv.summary.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (conv.short_summary && conv.short_summary.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    const totalPages = Math.ceil(conversations.length / limit);
+    const paginatedConversations = conversations.slice((page - 1) * limit, page * limit);
+
+    return {
+      conversations: paginatedConversations,
+      totalPages: totalPages
+    };
   } catch (error) {
     console.error('Error fetching conversations from Bee AI SDK:', error.message);
     throw new Error('Failed to fetch conversations from Bee AI SDK.');
   }
+}
+
+async function bulkDeleteTodos(todoIds) {
+    for (const todoId of todoIds) {
+        await deleteTodo(todoId);
+    }
+}
+
+async function bulkCompleteTodos(todoIds) {
+    for (const todoId of todoIds) {
+        await completeTodo(todoId);
+    }
+}
+
+async function bulkDeleteFacts(factIds) {
+    for (const factId of factIds) {
+        await deleteFact(factId);
+    }
+}
+
+async function bulkConfirmFacts(factIds) {
+    for (const factId of factIds) {
+        await confirmFact(factId);
+    }
+}
+
+async function bulkUnconfirmFacts(factIds) {
+    for (const factId of factIds) {
+        await unconfirmFact(factId);
+    }
 }
 
 module.exports = {
@@ -118,5 +205,10 @@ module.exports = {
   unconfirmFact,
   updateFact,
   getConversations,
-  updateTodo
+  updateTodo,
+  bulkDeleteTodos,
+  bulkCompleteTodos,
+  bulkDeleteFacts,
+  bulkConfirmFacts,
+  bulkUnconfirmFacts
 };

@@ -61,7 +61,8 @@ app.get('/api/todos', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const todos = await beeService.getTodos(page, limit);
+        const searchTerm = req.query.search || '';
+        const todos = await beeService.getTodos(page, limit, searchTerm);
         res.json(todos);
     } catch (error) {
         console.error('Error fetching todos:', error.message);
@@ -74,8 +75,9 @@ app.get('/api/facts', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const confirmed = req.query.confirmed === 'true' ? true : (req.query.confirmed === 'false' ? false : undefined);
-        const facts = await beeService.getFacts(confirmed, page, limit);
+        const confirmed = req.query.confirmed === 'true';
+        const searchTerm = req.query.search || '';
+        const facts = await beeService.getFacts(confirmed, page, limit, searchTerm);
         res.json(facts);
     } catch (error) {
         console.error('Error fetching facts:', error);
@@ -166,14 +168,72 @@ app.get('/api/conversations', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const conversationsData = await beeService.getConversations(page, limit);
-        // The service now returns the whole object, which might be like { conversations: [], totalPages: X }
-        // Ensure this structure is what the frontend expects, or adapt here.
-        // Based on app.js, it expects { conversations: [], totalPages: X }
+        const searchTerm = req.query.search || '';
+        const conversationsData = await beeService.getConversations(page, limit, searchTerm);
         res.json(conversationsData);
     } catch (error) {
         console.error('Error fetching conversations:', error.message);
         res.status(500).json({ message: error.message });
+    }
+});
+
+// Endpoint to bulk delete todos
+app.post('/api/todos/bulk-delete', async (req, res) => {
+    try {
+        const { todoIds } = req.body;
+        await beeService.bulkDeleteTodos(todoIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk deleting todos:', error);
+        res.status(500).json({ message: 'Failed to bulk delete todos.' });
+    }
+});
+
+// Endpoint to bulk complete todos
+app.post('/api/todos/bulk-complete', async (req, res) => {
+    try {
+        const { todoIds } = req.body;
+        await beeService.bulkCompleteTodos(todoIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk completing todos:', error);
+        res.status(500).json({ message: 'Failed to bulk complete todos.' });
+    }
+});
+
+// Endpoint to bulk delete facts
+app.post('/api/facts/bulk-delete', async (req, res) => {
+    try {
+        const { factIds } = req.body;
+        await beeService.bulkDeleteFacts(factIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk deleting facts:', error);
+        res.status(500).json({ message: 'Failed to bulk delete facts.' });
+    }
+});
+
+// Endpoint to bulk confirm facts
+app.post('/api/facts/bulk-confirm', async (req, res) => {
+    try {
+        const { factIds } = req.body;
+        await beeService.bulkConfirmFacts(factIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk confirming facts:', error);
+        res.status(500).json({ message: 'Failed to bulk confirm facts.' });
+    }
+});
+
+// Endpoint to bulk unconfirm facts
+app.post('/api/facts/bulk-unconfirm', async (req, res) => {
+    try {
+        const { factIds } = req.body;
+        await beeService.bulkUnconfirmFacts(factIds);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error bulk unconfirming facts:', error);
+        res.status(500).json({ message: 'Failed to bulk unconfirm facts.' });
     }
 });
 

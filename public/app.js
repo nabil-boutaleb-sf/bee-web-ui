@@ -27,6 +27,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Todos Page (for todos.html) ---
     if (todosContainer) {
         loadTodos();
+        const todoSearchInput = document.getElementById('todo-search');
+        if (todoSearchInput) {
+            todoSearchInput.addEventListener('input', () => {
+                // Debounce search to avoid excessive API calls
+                clearTimeout(todoSearchInput.searchTimeout);
+                todoSearchInput.searchTimeout = setTimeout(() => {
+                    currentPageTodos = 1; // Reset to first page for new search
+                    loadTodos(todoSearchInput.value);
+                }, 300);
+            });
+        }
         // Event listeners for bulk actions - Todos
         document.getElementById('select-all-incomplete-todos')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'incomplete-todos-list'));
         document.getElementById('bulk-delete-incomplete-todos')?.addEventListener('click', () => bulkDeleteTodos('incomplete'));
@@ -38,7 +49,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Facts Page (for facts.html) ---
     if (factsContainer) {
-        loadFacts();
+        loadFacts(); // Initial load
+        const factSearchInput = document.getElementById('fact-search');
+        if (factSearchInput) {
+            factSearchInput.addEventListener('input', () => {
+                clearTimeout(factSearchInput.searchTimeout);
+                factSearchInput.searchTimeout = setTimeout(() => {
+                    currentPageConfirmed = 1; // Reset page for new search
+                    currentPageUnconfirmed = 1; // Reset page for new search
+                    loadFacts(factSearchInput.value);
+                }, 300);
+            });
+        }
         // Event listeners for bulk actions - Facts
         document.getElementById('select-all-confirmed-facts')?.addEventListener('change', (e) => toggleSelectAll(e.target, 'confirmed-facts-list'));
         document.getElementById('bulk-delete-confirmed-facts')?.addEventListener('click', () => bulkDeleteFacts('confirmed'));
@@ -51,36 +73,45 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Conversations Page (for conversations.html) ---
     if (conversationsContainer) {
-        loadConversations();
+        loadConversations(); // Initial load
+        const conversationSearchInput = document.getElementById('conversation-search');
+        if (conversationSearchInput) {
+            conversationSearchInput.addEventListener('input', () => {
+                clearTimeout(conversationSearchInput.searchTimeout);
+                conversationSearchInput.searchTimeout = setTimeout(() => {
+                    currentPageConversations = 1;
+                    loadConversations(conversationSearchInput.value);
+                }, 300);
+            });
+        }
     }
 });
 
 let currentPageConversations = 1;
-const conversationsLimit = 10; // Or any other default limit
+const conversationsLimit = 10;
 
 let currentPageTodos = 1;
 const todosLimit = 10;
 
-async function loadTodos() {
+async function loadTodos(searchTerm = '') {
     const incompleteTodosList = document.getElementById('incomplete-todos-list');
     const completedTodosList = document.getElementById('completed-todos-list');
     const todosContainer = document.getElementById('todos-container');
 
     try {
-        const response = await fetch(`/api/todos?page=${currentPageTodos}&limit=${todosLimit}`);
+        const response = await fetch(`/api/todos?page=${currentPageTodos}&limit=${todosLimit}&search=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         const todos = data.todos;
+        const totalPages = data.totalPages;
 
-        incompleteTodosList.innerHTML = ''; // Clear previous items
-        completedTodosList.innerHTML = ''; // Clear previous items
+        incompleteTodosList.innerHTML = '';
+        completedTodosList.innerHTML = '';
 
-        // Clear "select all" checkboxes on load (especially for pagination)
         document.getElementById('select-all-incomplete-todos') && (document.getElementById('select-all-incomplete-todos').checked = false);
         document.getElementById('select-all-completed-todos') && (document.getElementById('select-all-completed-todos').checked = false);
-
 
         const incompleteTodos = todos.filter(todo => !todo.completed);
         const completedTodos = todos.filter(todo => todo.completed);
@@ -166,7 +197,6 @@ async function loadTodos() {
             completedTodosList.appendChild(ul);
         }
 
-        // Pagination for todos
         let paginationContainer = todosContainer.querySelector('.pagination-container');
         if (paginationContainer) {
             paginationContainer.remove();
@@ -179,20 +209,20 @@ async function loadTodos() {
         prevButton.disabled = currentPageTodos === 1;
         prevButton.onclick = () => {
             currentPageTodos--;
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         };
         paginationContainer.appendChild(prevButton);
 
         const pageInfo = document.createElement('span');
-        pageInfo.textContent = `Page ${currentPageTodos} of ${data.totalPages}`;
+        pageInfo.textContent = `Page ${currentPageTodos} of ${totalPages}`;
         paginationContainer.appendChild(pageInfo);
 
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.disabled = todos.length < todosLimit;
+        nextButton.disabled = currentPageTodos >= totalPages;
         nextButton.onclick = () => {
             currentPageTodos++;
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         };
         paginationContainer.appendChild(nextButton);
 
@@ -205,7 +235,6 @@ async function loadTodos() {
     }
 }
 
-// --- Bulk Action Helper ---
 function toggleSelectAll(sourceCheckbox, listId) {
     const listContainer = document.getElementById(listId);
     if (!listContainer) return;
@@ -215,7 +244,6 @@ function toggleSelectAll(sourceCheckbox, listId) {
     });
 }
 
-// --- Bulk Todo Actions ---
 async function bulkDeleteTodos(type) {
     const listId = type === 'incomplete' ? 'incomplete-todos-list' : 'completed-todos-list';
     const listContainer = document.getElementById(listId);
@@ -240,7 +268,7 @@ async function bulkDeleteTodos(type) {
             body: JSON.stringify({ todoIds: selectedIds })
         });
         if (response.ok) {
-            loadTodos(); // Reload todos
+            loadTodos(document.getElementById('todo-search')?.value || '');
         } else {
             const errorData = await response.json();
             alert(`Failed to delete selected todos: ${errorData.message || response.statusText}`);
@@ -274,7 +302,7 @@ async function bulkCompleteTodos() {
             body: JSON.stringify({ todoIds: selectedIds })
         });
         if (response.ok) {
-            loadTodos(); // Reload todos
+            loadTodos(document.getElementById('todo-search')?.value || '');
         } else {
             const errorData = await response.json();
             alert(`Failed to complete selected todos: ${errorData.message || response.statusText}`);
@@ -285,8 +313,6 @@ async function bulkCompleteTodos() {
     }
 }
 
-
-// --- Bulk Fact Actions ---
 async function bulkDeleteFacts(type) {
     const listId = type === 'confirmed' ? 'confirmed-facts-list' : 'unconfirmed-facts-list';
     const listContainer = document.getElementById(listId);
@@ -311,7 +337,7 @@ async function bulkDeleteFacts(type) {
             body: JSON.stringify({ factIds: selectedIds })
         });
         if (response.ok) {
-            loadFacts(); // Reload facts
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             const errorData = await response.json();
             alert(`Failed to delete selected facts: ${errorData.message || response.statusText}`);
@@ -345,7 +371,7 @@ async function bulkConfirmFacts() {
             body: JSON.stringify({ factIds: selectedIds })
         });
         if (response.ok) {
-            loadFacts(); // Reload facts
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             const errorData = await response.json();
             alert(`Failed to confirm selected facts: ${errorData.message || response.statusText}`);
@@ -373,13 +399,13 @@ async function bulkUnconfirmFacts() {
     }
 
     try {
-        const response = await fetch('/api/facts/bulk-unconfirm', { // Corrected endpoint
-            method: 'POST', // Should be POST or PUT, aligning with backend
+        const response = await fetch('/api/facts/bulk-unconfirm', {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ factIds: selectedIds })
         });
         if (response.ok) {
-            loadFacts(); // Reload facts
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             const errorData = await response.json();
             alert(`Failed to unconfirm selected facts: ${errorData.message || response.statusText}`);
@@ -394,7 +420,7 @@ async function completeTodo(todoId) {
     try {
         const response = await fetch(`/api/todos/${todoId}/complete`, { method: 'PUT' });
         if (response.ok) {
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         } else {
             alert('Failed to complete todo.');
         }
@@ -408,7 +434,7 @@ async function deleteTodo(todoId) {
     try {
         const response = await fetch(`/api/todos/${todoId}`, { method: 'DELETE' });
         if (response.ok) {
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         } else {
             alert('Failed to delete todo.');
         }
@@ -419,11 +445,11 @@ async function deleteTodo(todoId) {
 }
 
 function editTodo(li, todoId, currentText) {
-    const originalContent = li.innerHTML; // Save the original content
-    li.innerHTML = ''; // Clear the list item
+    const originalContent = li.innerHTML;
+    li.innerHTML = '';
 
     const form = document.createElement('form');
-    form.classList.add('edit-fact-form'); // Re-use the same style as facts
+    form.classList.add('edit-fact-form');
     form.onsubmit = (e) => {
         e.preventDefault();
         updateTodo(todoId, input.value);
@@ -449,8 +475,7 @@ function editTodo(li, todoId, currentText) {
     cancelButton.type = 'button';
     cancelButton.classList.add('icon-btn', 'delete-btn');
     cancelButton.onclick = () => {
-        li.innerHTML = originalContent; // Restore original content
-        // Re-attach event listeners
+        li.innerHTML = originalContent;
         const editButton = li.querySelector('.edit-btn');
         if (editButton) {
             editButton.onclick = () => editTodo(li, todoId, currentText);
@@ -481,7 +506,7 @@ async function updateTodo(todoId, text) {
             body: JSON.stringify({ text })
         });
         if (response.ok) {
-            loadTodos();
+            loadTodos(document.getElementById('todo-search')?.value || '');
         } else {
             alert('Failed to update todo.');
         }
@@ -495,28 +520,27 @@ let currentPageConfirmed = 1;
 let currentPageUnconfirmed = 1;
 const limit = 10;
 
-async function loadFacts() {
-    await loadConfirmedFacts();
-    await loadUnconfirmedFacts();
+async function loadFacts(searchTerm = '') {
+    await loadConfirmedFacts(searchTerm);
+    await loadUnconfirmedFacts(searchTerm);
 }
 
-async function loadConfirmedFacts() {
+async function loadConfirmedFacts(searchTerm = '') {
     const confirmedFactsList = document.getElementById('confirmed-facts-list');
     try {
-        const response = await fetch(`/api/facts?confirmed=true&page=${currentPageConfirmed}&limit=${limit}`);
+        const response = await fetch(`/api/facts?confirmed=true&page=${currentPageConfirmed}&limit=${limit}&search=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         const facts = data.facts;
+        const totalPages = data.totalPages;
 
-        confirmedFactsList.innerHTML = ''; // Clear previous items
-        // Clear "select all" checkbox on load
+        confirmedFactsList.innerHTML = '';
         document.getElementById('select-all-confirmed-facts') && (document.getElementById('select-all-confirmed-facts').checked = false);
 
-
         if (facts.length === 0) {
-            confirmedFactsList.innerHTML = '<p>No confirmed facts found.</p>';
+            confirmedFactsList.innerHTML = searchTerm ? '<p>No confirmed facts match your search.</p>' : '<p>No confirmed facts found.</p>';
         } else {
             const ul = document.createElement('ul');
             facts.forEach(fact => {
@@ -562,7 +586,6 @@ async function loadConfirmedFacts() {
             confirmedFactsList.appendChild(ul);
         }
 
-        // Pagination for confirmed facts
         const paginationContainer = document.createElement('div');
         paginationContainer.classList.add('pagination-container');
 
@@ -571,20 +594,20 @@ async function loadConfirmedFacts() {
         prevButton.disabled = currentPageConfirmed === 1;
         prevButton.onclick = () => {
             currentPageConfirmed--;
-            loadConfirmedFacts();
+            loadConfirmedFacts(document.getElementById('fact-search')?.value || '');
         };
         paginationContainer.appendChild(prevButton);
 
         const pageInfo = document.createElement('span');
-        pageInfo.textContent = `Page ${currentPageConfirmed} of ${data.totalPages}`;
+        pageInfo.textContent = `Page ${currentPageConfirmed} of ${totalPages}`;
         paginationContainer.appendChild(pageInfo);
 
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.disabled = facts.length < limit;
+        nextButton.disabled = currentPageConfirmed >= totalPages;
         nextButton.onclick = () => {
             currentPageConfirmed++;
-            loadConfirmedFacts();
+            loadConfirmedFacts(document.getElementById('fact-search')?.value || '');
         };
         paginationContainer.appendChild(nextButton);
 
@@ -596,22 +619,22 @@ async function loadConfirmedFacts() {
     }
 }
 
-async function loadUnconfirmedFacts() {
+async function loadUnconfirmedFacts(searchTerm = '') {
     const unconfirmedFactsList = document.getElementById('unconfirmed-facts-list');
     try {
-        const response = await fetch(`/api/facts?confirmed=false&page=${currentPageUnconfirmed}&limit=${limit}`);
+        const response = await fetch(`/api/facts?confirmed=false&page=${currentPageUnconfirmed}&limit=${limit}&search=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         const facts = data.facts;
+        const totalPages = data.totalPages;
 
-        unconfirmedFactsList.innerHTML = ''; // Clear previous items
-        // Clear "select all" checkbox on load
+        unconfirmedFactsList.innerHTML = '';
         document.getElementById('select-all-unconfirmed-facts') && (document.getElementById('select-all-unconfirmed-facts').checked = false);
 
         if (facts.length === 0) {
-            unconfirmedFactsList.innerHTML = '<p>No unconfirmed facts found.</p>';
+            unconfirmedFactsList.innerHTML = searchTerm ? '<p>No unconfirmed facts match your search.</p>' : '<p>No unconfirmed facts found.</p>';
         } else {
             const ul = document.createElement('ul');
             facts.forEach(fact => {
@@ -657,7 +680,6 @@ async function loadUnconfirmedFacts() {
             unconfirmedFactsList.appendChild(ul);
         }
 
-        // Pagination for unconfirmed facts
         const paginationContainer = document.createElement('div');
         paginationContainer.classList.add('pagination-container');
 
@@ -666,20 +688,20 @@ async function loadUnconfirmedFacts() {
         prevButton.disabled = currentPageUnconfirmed === 1;
         prevButton.onclick = () => {
             currentPageUnconfirmed--;
-            loadUnconfirmedFacts();
+            loadUnconfirmedFacts(document.getElementById('fact-search')?.value || '');
         };
         paginationContainer.appendChild(prevButton);
 
         const pageInfo = document.createElement('span');
-        pageInfo.textContent = `Page ${currentPageUnconfirmed} of ${data.totalPages}`;
+        pageInfo.textContent = `Page ${currentPageUnconfirmed} of ${totalPages}`;
         paginationContainer.appendChild(pageInfo);
 
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.disabled = facts.length < limit;
+        nextButton.disabled = currentPageUnconfirmed >= totalPages;
         nextButton.onclick = () => {
             currentPageUnconfirmed++;
-            loadUnconfirmedFacts();
+            loadUnconfirmedFacts(document.getElementById('fact-search')?.value || '');
         };
         paginationContainer.appendChild(nextButton);
 
@@ -695,7 +717,7 @@ async function deleteFact(factId) {
     try {
         const response = await fetch(`/api/facts/${factId}`, { method: 'DELETE' });
         if (response.ok) {
-            loadFacts(); // Reload both lists after deleting
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             alert('Failed to delete fact.');
         }
@@ -709,7 +731,7 @@ async function confirmFact(factId) {
     try {
         const response = await fetch(`/api/facts/${factId}/confirm`, { method: 'PUT' });
         if (response.ok) {
-            loadFacts(); // Reload both lists after confirming
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             alert('Failed to confirm fact.');
         }
@@ -723,7 +745,7 @@ async function unconfirmFact(factId) {
     try {
         const response = await fetch(`/api/facts/${factId}/unconfirm`, { method: 'PUT' });
         if (response.ok) {
-            loadFacts(); // Reload both lists after unconfirming
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             alert('Failed to unconfirm fact.');
         }
@@ -743,7 +765,7 @@ async function updateFact(factId, text) {
             body: JSON.stringify({ text })
         });
         if (response.ok) {
-            loadFacts();
+            loadFacts(document.getElementById('fact-search')?.value || '');
         } else {
             alert('Failed to update fact.');
         }
@@ -754,8 +776,8 @@ async function updateFact(factId, text) {
 }
 
 function editFact(li, factId, currentText) {
-    const originalContent = li.innerHTML; // Save the original content
-    li.innerHTML = ''; // Clear the list item
+    const originalContent = li.innerHTML;
+    li.innerHTML = '';
 
     const form = document.createElement('form');
     form.classList.add('edit-fact-form');
@@ -784,8 +806,7 @@ function editFact(li, factId, currentText) {
     cancelButton.type = 'button';
     cancelButton.classList.add('icon-btn', 'delete-btn');
     cancelButton.onclick = () => {
-        li.innerHTML = originalContent; // Restore original content
-        // Re-attach event listeners
+        li.innerHTML = originalContent;
         const editButton = li.querySelector('.edit-btn');
         if (editButton) {
             editButton.onclick = () => editFact(li, factId, currentText);
@@ -810,54 +831,24 @@ function editFact(li, factId, currentText) {
     input.focus();
 }
 
-async function loadConversations() {
+async function loadConversations(searchTerm = '') {
     const conversationsContainer = document.getElementById('conversations-container');
-    const searchInput = document.getElementById('conversation-search');
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-
     try {
-        // Explicitly check if the markdown-it library is loaded
-        if (typeof window.markdownit !== 'function') {
-            throw new Error('Markdown rendering library failed to load. Please check your network connection or ad-blocker.');
-        }
-
-        // Initialize markdown-it
-        const md = window.markdownit({
-            html: true, // Enable HTML tags in source
-            breaks: true, // Convert '\n' in paragraphs into <br>
-            linkify: true // Autoconvert URL-like text to links
-        });
-
-        // The backend service was updated, but the frontend still calls /api/conversations
-        // This route needs to be updated or a new one created to pass pagination params.
-        // For now, let's assume the API endpoint is updated to accept page and limit.
-        // We will call the service function `getConversations` which is expected to be available globally
-        // or correctly routed if this were a real backend call from the frontend.
-        // However, app.js is client-side, so it cannot directly call beeService.js functions.
-        // We need to adjust the fetch call to an API endpoint that supports pagination.
-        // Let's assume `/api/conversations` now supports `page` and `limit` query params.
-
-        const response = await fetch(`/api/conversations?page=${currentPageConversations}&limit=${conversationsLimit}`);
+        const response = await fetch(`/api/conversations?page=${currentPageConversations}&limit=${conversationsLimit}&search=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json(); // Expecting { conversations: [], totalPages: X }
+        const data = await response.json();
         const conversations = data.conversations;
         const totalPages = data.totalPages;
 
-        conversationsContainer.innerHTML = ''; // Clear previous content
+        conversationsContainer.innerHTML = '';
 
-        const filteredConversations = conversations.filter(conversation => {
-            const summary = (conversation.short_summary || '').toLowerCase();
-            const content = (conversation.summary || '').toLowerCase();
-            return summary.includes(searchTerm) || content.includes(searchTerm);
-        });
-
-        if (filteredConversations.length === 0) {
-            conversationsContainer.innerHTML = '<p>No conversations found.</p>';
+        if (conversations.length === 0) {
+            conversationsContainer.innerHTML = searchTerm ? '<p>No conversations match your search.</p>' : '<p>No conversations found.</p>';
         } else {
             const ul = document.createElement('ul');
-            filteredConversations.forEach(conversation => {
+            conversations.forEach(conversation => {
                 const li = document.createElement('li');
                 li.classList.add('conversation-item');
                 li.dataset.conversationId = conversation.id;
@@ -883,17 +874,16 @@ async function loadConversations() {
 
                 const panel = document.createElement('div');
                 panel.classList.add('accordion-panel');
-                panel.innerHTML = md.render(conversation.summary || 'No detailed content available.');
+                panel.innerHTML = (typeof markdownit === 'function' ? markdownit().render(conversation.summary || 'No detailed content available.') : (conversation.summary || 'No detailed content available.'));
 
                 if (conversation.state !== 'CAPTURING') {
                     const icon = document.createElement('span');
                     icon.classList.add('accordion-icon');
-                    icon.innerHTML = '&#8250;'; // Chevron right
+                    icon.innerHTML = '&#8250;';
                     li.appendChild(icon);
                     li.appendChild(panel);
 
                     li.addEventListener('click', (e) => {
-                        // Prevent accordion toggle when clicking on links inside the panel
                         if (e.target.tagName === 'A' && panel.contains(e.target)) {
                             return;
                         }
@@ -913,7 +903,6 @@ async function loadConversations() {
             conversationsContainer.appendChild(ul);
         }
 
-        // Pagination controls
         let paginationContainer = conversationsContainer.parentNode.querySelector('.pagination-container');
         if (paginationContainer) {
             paginationContainer.remove();
@@ -927,7 +916,7 @@ async function loadConversations() {
         prevButton.onclick = () => {
             if (currentPageConversations > 1) {
                 currentPageConversations--;
-                loadConversations();
+                loadConversations(document.getElementById('conversation-search')?.value || '');
             }
         };
         paginationContainer.appendChild(prevButton);
@@ -938,29 +927,16 @@ async function loadConversations() {
 
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        // Disable if on the last page or if totalPages is not yet known (e.g., first load error)
         nextButton.disabled = currentPageConversations >= (totalPages || 1);
         nextButton.onclick = () => {
             if (currentPageConversations < (totalPages || 1)) {
                 currentPageConversations++;
-                loadConversations();
+                loadConversations(document.getElementById('conversation-search')?.value || '');
             }
         };
         paginationContainer.appendChild(nextButton);
 
-        // Insert pagination controls after the conversationsContainer
         conversationsContainer.parentNode.insertBefore(paginationContainer, conversationsContainer.nextSibling);
-
-        // Add event listener for search input
-        if (searchInput) {
-            searchInput.onkeyup = () => {
-                // Reset to page 1 when search term changes, and reload.
-                // This is a simple approach; a more complex one might debounce or search on server.
-                currentPageConversations = 1;
-                loadConversations();
-            };
-        }
-
 
     } catch (error) {
         console.error('Failed to load conversations:', error);
