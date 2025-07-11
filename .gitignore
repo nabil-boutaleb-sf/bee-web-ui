@@ -13,3 +13,7 @@ logs
 # macOS specific
 .DS_Store
 .AppleDouble
+
+# Playwright test results and reports
+/test-results
+/playwright-report

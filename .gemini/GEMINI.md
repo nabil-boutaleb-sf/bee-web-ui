@@ -31,6 +31,7 @@ The project is built with a Node.js/Express backend that serves a vanilla HTML, 
 - **Proactive Problem Solving:** Upon encountering failures or unexpected issues, prioritize independent problem-solving using available tools and context. Only involve the user after exhausting self-resolution attempts or when explicit user input/decision is absolutely necessary. Aim to provide actionable solutions or next steps for the agent, rather than immediately deferring to the user.
     - **Tool/Environment Failures:** If a tool fails due to an environmental issue (e.g., missing authentication, uninstalled dependency), proactively guide the user on how to resolve that underlying issue so the agent can successfully execute the tool in the future, rather than asking the user to perform the task manually.
     - **Git Command Failures:** If a git command fails, attempt to pull from the remote (e.g., `origin`) before re-attempting the command.
+    - **Terminal Command Execution:** When running terminal commands that might take a long time or block interaction, prefer running them in the background using `&` and redirecting their output to a file for later review.
 
 ## Current Project Status
 

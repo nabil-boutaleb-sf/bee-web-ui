@@ -61,7 +61,8 @@ app.get('/api/todos', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const todos = await beeService.getTodos(page, limit);
+        const searchTerm = req.query.search || '';
+        const todos = await beeService.getTodos(page, limit, searchTerm);
         res.json(todos);
     } catch (error) {
         console.error('Error fetching todos:', error.message);
@@ -74,8 +75,9 @@ app.get('/api/facts', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const confirmed = req.query.confirmed === 'true' ? true : (req.query.confirmed === 'false' ? false : undefined);
-        const facts = await beeService.getFacts(confirmed, page, limit);
+        const confirmed = req.query.confirmed === 'true';
+        const searchTerm = req.query.search || '';
+        const facts = await beeService.getFacts(confirmed, page, limit, searchTerm);
         res.json(facts);
     } catch (error) {
         console.error('Error fetching facts:', error);

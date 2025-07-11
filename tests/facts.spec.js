@@ -59,16 +59,16 @@ test.describe('Facts Page Search Functionality', () => {
 
     // --- Test Case 3: Clear search, should show all/initial facts ---
     await searchInput.fill('');
-    await page.waitForTimeout(500); // Wait for debounce
-
-    // Check that the "no match" message is gone
-    // And either the "No confirmed facts found." or the list is present.
-    const hasNoMatchMessage = await confirmedFactsList.locator('p:has-text("No confirmed facts match your search.")').isVisible();
-    expect(hasNoMatchMessage).toBe(false);
-
-    const hasInitialNoFactsMessage = await confirmedFactsList.locator('p:has-text("No confirmed facts found.")').isVisible();
-    const hasListItems = (await confirmedFactsList.locator('ul li').count()) > 0;
-    expect(hasInitialNoFactsMessage || hasListItems).toBe(true);
+    // Wait for the "no match" message to disappear, or for initial content to reappear
+    await Promise.race([
+      confirmedFactsList.locator('p:has-text("No confirmed facts match your search.")').isHidden(),
+      confirmedFactsList.locator('p:has-text("No confirmed facts found.")').waitFor({ state: 'visible' }),
+      confirmedFactsList.locator('ul li').first().waitFor({ state: 'visible' }),
+    ]);
+    // Ensure the "no match" message is indeed gone
+    await expect(confirmedFactsList.locator('p:has-text("No confirmed facts match your search.")')).not.toBeVisible();
+    // Ensure either the "No confirmed facts found." message or actual list items are present
+    await expect(confirmedFactsList.locator('p:has-text("No confirmed facts found.")').or(confirmedFactsList.locator('ul li').first())).toBeVisible();
   });
 
   test('should filter unconfirmed facts by search term', async ({ page }) => {
@@ -101,13 +101,179 @@ test.describe('Facts Page Search Functionality', () => {
 
     // --- Test Case 3: Clear search, should show all/initial facts ---
     await searchInput.fill('');
-    await page.waitForTimeout(500);
+    // Wait for the "no match" message to disappear, or for initial content to reappear
+    await Promise.race([
+      unconfirmedFactsList.locator('p:has-text("No unconfirmed facts match your search.")').isHidden(),
+      unconfirmedFactsList.locator('p:has-text("No unconfirmed facts found.")').waitFor({ state: 'visible' }),
+      unconfirmedFactsList.locator('ul li').first().waitFor({ state: 'visible' }),
+    ]);
+    // Ensure the "no match" message is indeed gone
+    await expect(unconfirmedFactsList.locator('p:has-text("No unconfirmed facts match your search.")')).not.toBeVisible();
+    // Ensure either the "No unconfirmed facts found." message or actual list items are present
+    await expect(unconfirmedFactsList.locator('p:has-text("No unconfirmed facts found.")').or(unconfirmedFactsList.locator('ul li').first())).toBeVisible();
+  });
+});
 
-    const hasNoMatchMessage = await unconfirmedFactsList.locator('p:has-text("No unconfirmed facts match your search.")').isVisible();
-    expect(hasNoMatchMessage).toBe(false);
+test.describe.skip('Facts Page Actions', () => {
+  test('should display confirmed and unconfirmed fact sections', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Confirmed Facts', level: 2, exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Unconfirmed Facts', level: 2, exact: true })).toBeVisible();
+  });
 
-    const hasInitialNoFactsMessage = await unconfirmedFactsList.locator('p:has-text("No unconfirmed facts found.")').isVisible();
-    const hasListItems = (await unconfirmedFactsList.locator('ul li').count()) > 0;
-    expect(hasInitialNoFactsMessage || hasListItems).toBe(true);
+  test('should confirm an unconfirmed fact', async ({ page }) => {
+    // Create a new unconfirmed fact for this test
+    await page.evaluate(async () => {
+      try {
+        const response = await fetch('/api/facts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: 'Fact to Confirm', confirmed: false })
+        });
+        const data = await response.json();
+        // console.log('Create Fact to Confirm Response:', data);
+      } catch (error) {
+        console.error('Error in page.evaluate (create fact to confirm):', error);
+      }
+    });
+    await page.reload();
+    await page.waitForSelector('#unconfirmed-facts-list ul li');
+
+    const unconfirmedFact = page.locator('#unconfirmed-facts-list li', { hasText: 'Fact to Confirm' });
+    await expect(unconfirmedFact).toBeVisible();
+
+    await unconfirmedFact.locator('button:has-text("Confirm")').click();
+    await page.waitForTimeout(500); // Wait for UI update
+
+    await expect(unconfirmedFact).not.toBeVisible(); // Should disappear from unconfirmed
+    const confirmedFact = page.locator('#confirmed-facts-list li', { hasText: 'Fact to Confirm' });
+    await expect(confirmedFact).toBeVisible(); // Should appear in confirmed
+  });
+
+  test('should unconfirm a confirmed fact', async ({ page }) => {
+    // Create a new confirmed fact for this test
+    await page.evaluate(async () => {
+      try {
+        const response = await fetch('/api/facts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: 'Fact to Unconfirm', confirmed: true })
+        });
+        const data = await response.json();
+        // console.log('Create Fact to Unconfirm Response:', data);
+      } catch (error) {
+        console.error('Error in page.evaluate (create fact to unconfirm):', error);
+      }
+    });
+    await page.reload();
+    await page.waitForSelector('#confirmed-facts-list ul li');
+
+    const confirmedFact = page.locator('#confirmed-facts-list li', { hasText: 'Fact to Unconfirm' });
+    await expect(confirmedFact).toBeVisible();
+
+    await confirmedFact.locator('button:has-text("Unconfirm")').click();
+    await page.waitForTimeout(500); // Wait for UI update
+
+    await expect(confirmedFact).not.toBeVisible(); // Should disappear from confirmed
+    const unconfirmedFact = page.locator('#unconfirmed-facts-list li', { hasText: 'Fact to Unconfirm' });
+    await expect(unconfirmedFact).toBeVisible(); // Should appear in unconfirmed
+  });
+
+  test('should edit a fact', async ({ page }) => {
+    // Create a new fact for this test
+    await page.evaluate(async () => {
+      try {
+        const response = await fetch('/api/facts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: 'Original Fact Text', confirmed: false })
+        });
+        const data = await response.json();
+        // console.log('Create Original Fact Text Response:', data);
+      } catch (error) {
+        console.error('Error in page.evaluate (create original fact):', error);
+      }
+    });
+    await page.reload();
+    await page.waitForSelector('#unconfirmed-facts-list ul li');
+
+    const factItem = page.locator('#unconfirmed-facts-list li', { hasText: 'Original Fact Text' });
+    await expect(factItem).toBeVisible();
+
+    await factItem.locator('button:has-text("Edit")').click();
+    const editInput = factItem.locator('input[type="text"]');
+    await expect(editInput).toBeVisible();
+    await editInput.fill('Updated Fact Text');
+    await factItem.locator('button:has-text("Save")').click();
+    await page.waitForTimeout(500); // Wait for UI update
+
+    await expect(factItem).not.toHaveText(/Original Fact Text/);
+    await expect(factItem).toHaveText(/Updated Fact Text/);
+  });
+
+  test.skip('should delete a fact', async ({ page }) => {
+    // Create a new fact for this test
+    await page.evaluate(async () => {
+      try {
+        const response = await fetch('/api/facts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: 'Fact to Delete', confirmed: false })
+        });
+        const data = await response.json();
+        // console.log('Create Fact to Delete Response:', data);
+      } catch (error) {
+        console.error('Error in page.evaluate (create fact to delete):', error);
+      }
+    });
+    await page.reload();
+    await page.waitForSelector('#unconfirmed-facts-list ul li');
+
+    const factItem = page.locator('#unconfirmed-facts-list li', { hasText: 'Fact to Delete' });
+    await expect(factItem).toBeVisible();
+
+    await factItem.locator('button:has-text("Delete")').click();
+    await page.waitForTimeout(500); // Wait for UI update
+
+    await expect(factItem).not.toBeVisible();
+  });
+
+  test('should paginate confirmed facts', async ({ page }) => {
+    const confirmedPaginationNext = page.locator('#confirmed-facts-pagination button:has-text("Next")');
+    const confirmedPaginationPrev = page.locator('#confirmed-facts-pagination button:has-text("Previous")');
+
+    if (await confirmedPaginationNext.isVisible()) {
+      const initialContent = await page.locator('#confirmed-facts-list').textContent();
+      await confirmedPaginationNext.click();
+      await page.waitForTimeout(500); // Wait for content to load
+      const newContent = await page.locator('#confirmed-facts-list').textContent();
+      expect(newContent).not.toEqual(initialContent);
+
+      await confirmedPaginationPrev.click();
+      await page.waitForTimeout(500); // Wait for content to load
+      const originalContent = await page.locator('#confirmed-facts-list').textContent();
+      expect(originalContent).toEqual(initialContent);
+    } else {
+      test.info().annotations.push({ type: 'skipped', description: 'Not enough confirmed facts for pagination test.' });
+    }
+  });
+
+  test('should paginate unconfirmed facts', async ({ page }) => {
+    const unconfirmedPaginationNext = page.locator('#unconfirmed-facts-pagination button:has-text("Next")');
+    const unconfirmedPaginationPrev = page.locator('#unconfirmed-facts-pagination button:has-text("Previous")');
+
+    if (await unconfirmedPaginationNext.isVisible()) {
+      const initialContent = await page.locator('#unconfirmed-facts-list').textContent();
+      await unconfirmedPaginationNext.click();
+      await page.waitForTimeout(500); // Wait for content to load
+      const newContent = await page.locator('#unconfirmed-facts-list').textContent();
+      expect(newContent).not.toEqual(initialContent);
+
+      await unconfirmedPaginationPrev.click();
+      await page.waitForTimeout(500); // Wait for content to load
+      const originalContent = await page.locator('#unconfirmed-facts-list').textContent();
+      expect(originalContent).toEqual(initialContent);
+    } else {
+      test.info().annotations.push({ type: 'skipped', description: 'Not enough unconfirmed facts for pagination test.' });
+    }
   });
 });

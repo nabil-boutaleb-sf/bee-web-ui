@@ -19,14 +19,15 @@
 				// "eamodio.gitlens",
 				"google.geminicodeassist",
 				"Gruntfuggly.todo-tree",
-				"brave.vscode-pdf"
+				"brave.vscode-pdf",
+				"ms-playwright.playwright"
 			]
 		}
 	},
 	// This makes sure you are not running as the root user inside the container, which is a security best practice.
-	"remoteUser": "node",
+	"remoteUser": "pwuser",
 
 	// Forward the port from the container to your local machine so you can access it.
-	"forwardPorts": [3000]
+	"forwardPorts": [3000, 9323]
 	// The 'npm install' command has been moved to the Dockerfile for better caching.
 }
