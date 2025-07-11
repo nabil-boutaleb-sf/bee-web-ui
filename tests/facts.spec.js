@@ -75,31 +75,34 @@ test.describe('Facts Page Search Functionality', () => {
     const searchInput = page.locator('#fact-search');
     const unconfirmedFactsList = page.locator('#unconfirmed-facts-list');
 
-    // --- Test Case 1: Search for a term expected to have results ---
-    // Let's assume a fact containing "TestUnconf" exists or might exist.
-    await searchInput.fill('TestUnconf');
-    await page.waitForTimeout(500);
+    // --- Test Case 1: Create a specific fact for this test ---
+    const uniqueText = `TestUnconf-${Date.now()}`;
+    await page.evaluate(async (text) => {
+      await fetch('/api/facts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text, confirmed: false })
+      });
+    }, uniqueText);
+    await page.reload(); // Reload to see the new fact
+
+    // --- Test Case 2: Search for the new fact ---
+    await searchInput.fill(uniqueText);
+    await page.waitForTimeout(500); // Wait for debounce
 
     const unconfirmedItems = unconfirmedFactsList.locator('ul li');
-    const count = await unconfirmedItems.count();
+    await expect(unconfirmedItems.first()).toContainText(uniqueText);
+    await expect(unconfirmedItems).toHaveCount(1);
 
-    if (count > 0) {
-      for (let i = 0; i < count; i++) {
-        await expect(unconfirmedItems.nth(i)).toContainText(/TestUnconf/i);
-      }
-    } else {
-      await expect(unconfirmedFactsList.locator('p')).toHaveText('No unconfirmed facts match your search.');
-    }
-
-    // --- Test Case 2: Search for a term expected to have NO results ---
-    const uniqueSearchTerm = 'XZYXZYXZYThisShouldNotExistXZYXZYXZY';
-    await searchInput.fill(uniqueSearchTerm);
+    // --- Test Case 3: Search for a term that should have NO results ---
+    const noMatchTerm = 'NoMatchFactXYZ';
+    await searchInput.fill(noMatchTerm);
     await page.waitForTimeout(500);
 
     await expect(unconfirmedFactsList.locator('p')).toHaveText('No unconfirmed facts match your search.');
     await expect(unconfirmedFactsList.locator('ul li')).toHaveCount(0);
 
-    // --- Test Case 3: Clear search, should show all/initial facts ---
+    // --- Test Case 4: Clear search, should show all/initial facts ---
     await searchInput.fill('');
     // Wait for the "no match" message to disappear, or for initial content to reappear
     await Promise.race([

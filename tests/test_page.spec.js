@@ -5,12 +5,12 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/test.html');
   // Wait for the initial content to load
   await Promise.race([
-    page.waitForSelector('#confirmed-facts-list p:has-text("No confirmed facts found.")', { state: 'visible' }),
-    page.waitForSelector('#confirmed-facts-list ul li', { state: 'visible' }),
+    page.waitForSelector('#confirmed-facts-container p:has-text("No confirmed facts found.")', { state: 'visible' }),
+    page.waitForSelector('#confirmed-facts-container ul li', { state: 'visible' }),
   ]);
   await Promise.race([
-    page.waitForSelector('#unconfirmed-facts-list p:has-text("No unconfirmed facts found.")', { state: 'visible' }),
-    page.waitForSelector('#unconfirmed-facts-list ul li', { state: 'visible' }),
+    page.waitForSelector('#unconfirmed-facts-container p:has-text("No unconfirmed facts found.")', { state: 'visible' }),
+    page.waitForSelector('#unconfirmed-facts-container ul li', { state: 'visible' }),
   ]);
 });
 
