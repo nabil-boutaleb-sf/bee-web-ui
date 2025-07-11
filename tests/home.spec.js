@@ -4,7 +4,7 @@ const { test, expect } = require('@playwright/test');
 test.describe('Home Page', () => {
   test('should display successful connection status', async ({ page }) => {
     await page.goto('/');
-    const statusText = page.locator('#connection-status');
+    const statusText = page.locator('#auth-status');
     await expect(statusText).toBeVisible();
     await expect(statusText).toHaveText('Status: Connected to Bee API');
     await expect(statusText).toHaveCSS('color', 'rgb(0, 128, 0)'); // Green color
