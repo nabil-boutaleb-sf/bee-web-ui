@@ -2,6 +2,10 @@
 
 This document outlines the development tasks for the Bee Web UI project.
 
+## High Priority
+- [ ] **Fix Skipped Tests:**
+    - [ ] The test 'should filter unconfirmed facts by search term' in `tests/facts.spec.js` is currently skipped. To fix this, the test needs to create a new fact to search for, which requires implementing a `POST /api/facts` endpoint and the corresponding `createFact` service function.
+
 ## Blocked Tasks
 - [ ] **Todos Page:**
     - [ ] Separate todos into three sections: "Unconfirmed", "Incomplete", and "Completed". (Blocked by Bee.computer API clarification on "suggested todos")

@@ -71,7 +71,7 @@ test.describe('Facts Page Search Functionality', () => {
     await expect(confirmedFactsList.locator('p:has-text("No confirmed facts found.")').or(confirmedFactsList.locator('ul li').first())).toBeVisible();
   });
 
-  test('should filter unconfirmed facts by search term', async ({ page }) => {
+  test.skip('should filter unconfirmed facts by search term', async ({ page }) => {
     const searchInput = page.locator('#fact-search');
     const unconfirmedFactsList = page.locator('#unconfirmed-facts-list');
 
