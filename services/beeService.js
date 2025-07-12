@@ -20,40 +20,33 @@ async function confirmFact(factId) {
   }
 }
 
-async function getTodos(page = 1, limit = 10, searchTerm = '') {
+// Gets todos by completion status, with server-side filtering and pagination
+async function getTodos(completed, page = 1, limit = 10, searchTerm = '') {
   try {
-    // The beeai SDK doesn't support filtering by text, so we fetch all todos
-    // and filter them on the server. We fetch both complete and incomplete.
-    const incompletePromise = bee.getTodos('me', { completed: false, limit: 1000 });
-    const completedPromise = bee.getTodos('me', { completed: true, limit: 1000 });
-
-    const [incompleteResponse, completedResponse] = await Promise.all([
-      incompletePromise,
-      completedPromise,
-    ]);
-
-    let allTodos = [
-      ...(incompleteResponse.todos || []),
-      ...(completedResponse.todos || []),
-    ];
+    // The beeai SDK doesn't support search for todos.
+    // So, fetch all todos for the given status, then filter by search term, then paginate.
+    const response = await bee.getTodos('me', { completed, limit: 1000 }); // Fetch up to 1000 for the status
+    let todosForStatus = response.todos || [];
 
     if (searchTerm) {
-      allTodos = allTodos.filter(todo =>
+      todosForStatus = todosForStatus.filter(todo =>
         todo.text.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Now, paginate the filtered results
-    const totalPages = Math.ceil(allTodos.length / limit);
-    const paginatedTodos = allTodos.slice((page - 1) * limit, page * limit);
+    // Paginate the filtered results.
+    const totalItems = todosForStatus.length;
+    const totalPages = Math.ceil(totalItems / limit) || 1;
+    const paginatedTodos = todosForStatus.slice((page - 1) * limit, page * limit);
 
     return {
       todos: paginatedTodos,
-      totalPages,
+      totalPages: totalPages,
+      totalItems: totalItems // Good to return total items for this filtered set
     };
   } catch (error) {
-    console.error('Error fetching todos from Bee AI SDK:', error.message);
-    throw new Error('Failed to fetch todos from Bee AI SDK.');
+    console.error(`Error fetching ${completed ? 'completed' : 'incomplete'} todos from Bee AI SDK:`, error.message);
+    throw new Error(`Failed to fetch ${completed ? 'completed' : 'incomplete'} todos from Bee AI SDK.`);
   }
 }
 
