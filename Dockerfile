@@ -26,7 +26,7 @@ RUN chown -R 1000:1000 /workspaces/bee-web-ui
 USER pwuser
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 3000 9323
 
 # The command to start the app (will be used by 'npm start')
 CMD [ "node", "index.js" ]
