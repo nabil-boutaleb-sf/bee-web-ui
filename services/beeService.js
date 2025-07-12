@@ -20,18 +20,11 @@ async function confirmFact(factId) {
   }
 }
 
-// Gets todos by completion status, with server-side filtering and pagination
 async function getTodos(completed, page = 1, limit = 10, searchTerm = '') {
   try {
-    // The beeai SDK doesn't support search for todos.
-    // So, fetch all todos for the given status, then filter by search term, then paginate.
-    const response = await bee.getTodos('me', { completed, limit: 1000 }); // Fetch up to 1000 for the status
+    // Fetch all todos for the given 'completed' state, then filter by search term.
+    const response = await bee.getTodos('me', { completed, page: 1, limit: 1000 });
     let todos = response.todos || [];
-
-    // Explicitly filter by the 'completed' status to be certain,
-    // as the API/SDK might not be strictly filtering or items might lack the property consistently.
-    // This assumes todo items from the Bee API have a 'completed' boolean property.
-    todos = todos.filter(todo => typeof todo.completed === 'boolean' && todo.completed === completed);
 
     if (searchTerm) {
       todos = todos.filter(todo =>
@@ -40,18 +33,16 @@ async function getTodos(completed, page = 1, limit = 10, searchTerm = '') {
     }
 
     // Paginate the filtered results.
-    const totalItems = todos.length;
-    const totalPages = Math.ceil(totalItems / limit) || 1;
-    const paginatedTodos = todosForStatus.slice((page - 1) * limit, page * limit);
+    const totalPages = Math.ceil(todos.length / limit);
+    const paginatedTodos = todos.slice((page - 1) * limit, page * limit);
 
     return {
       todos: paginatedTodos,
       totalPages: totalPages,
-      totalItems: totalItems // Good to return total items for this filtered set
     };
   } catch (error) {
-    console.error(`Error fetching ${completed ? 'completed' : 'incomplete'} todos from Bee AI SDK:`, error.message);
-    throw new Error(`Failed to fetch ${completed ? 'completed' : 'incomplete'} todos from Bee AI SDK.`);
+    console.error('Error fetching todos from Bee AI SDK:', error.message);
+    throw new Error('Failed to fetch todos from Bee AI SDK.');
   }
 }
 

@@ -62,36 +62,12 @@ app.get('/api/todos', async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const searchTerm = req.query.search || '';
-        // Frontend will send 'true' or 'false' as strings
-        const completedParam = req.query.completed;
+        const completed = req.query.completed === 'true';
 
-        if (completedParam === undefined) {
-            // This case is for the previous client-side pagination model where all todos were fetched.
-            // To support the new model primarily, we could error here,
-            // or fetch 'all' if beeService.getTodos supported it (which it no longer does directly).
-            // For now, let's assume client will always send 'completed' status for specific lists.
-            // If we need to support fetching 'all' paginated todos (e.g. for a different view),
-            // this endpoint or beeService.getTodos would need further modification.
-            // However, the current beeService.getTodos implementation fetches BOTH and then filters/paginates client-side
-            // if no 'completed' status is passed to it.
-            // Let's adapt to call the old way if 'completed' is not specified, for broader compatibility,
-            // though our new UI won't use this path.
-            // For the new UI, 'completed' (true/false) will always be passed.
-             console.warn("/api/todos called without 'completed' query param. This might not align with new UI logic.");
-             // To maintain some backward compatibility or handle cases where 'completed' is not sent,
-             // we might need a more complex logic here or in beeService.
-             // For this refactor, we'll assume 'completed' will be sent by the new frontend logic.
-             // If not sent, it implies the old behaviour of fetching ALL (up to 2000) and client paginates.
-             // The updated beeService.getTodos now REQUIRES a boolean 'completed' status.
-             // So, this path needs a decision.
-             // Let's make 'completed' status mandatory for this endpoint for clarity with the new model.
-            return res.status(400).json({ message: "Query parameter 'completed' (true/false) is required." });
-        }
-
-        const completed = completedParam === 'true'; // Convert string to boolean
-
-        const todosData = await beeService.getTodos(completed, page, limit, searchTerm);
-        res.json(todosData);
+        // The 'completed' parameter is now essential for the service function.
+        // It will be either true or false based on the query string.
+        const todos = await beeService.getTodos(completed, page, limit, searchTerm);
+        res.json(todos);
     } catch (error) {
         console.error('Error fetching todos:', error.message);
         res.status(500).json({ message: error.message });
