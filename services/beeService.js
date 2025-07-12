@@ -26,16 +26,21 @@ async function getTodos(completed, page = 1, limit = 10, searchTerm = '') {
     // The beeai SDK doesn't support search for todos.
     // So, fetch all todos for the given status, then filter by search term, then paginate.
     const response = await bee.getTodos('me', { completed, limit: 1000 }); // Fetch up to 1000 for the status
-    let todosForStatus = response.todos || [];
+    let todos = response.todos || [];
+
+    // Explicitly filter by the 'completed' status to be certain,
+    // as the API/SDK might not be strictly filtering or items might lack the property consistently.
+    // This assumes todo items from the Bee API have a 'completed' boolean property.
+    todos = todos.filter(todo => typeof todo.completed === 'boolean' && todo.completed === completed);
 
     if (searchTerm) {
-      todosForStatus = todosForStatus.filter(todo =>
+      todos = todos.filter(todo =>
         todo.text.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Paginate the filtered results.
-    const totalItems = todosForStatus.length;
+    const totalItems = todos.length;
     const totalPages = Math.ceil(totalItems / limit) || 1;
     const paginatedTodos = todosForStatus.slice((page - 1) * limit, page * limit);
 

@@ -103,6 +103,7 @@ test.describe('Todos Page - Server-Side Separate Pagination', () => {
 
     await expect(list.locator('li')).toHaveCount(10);
     await expect(list.locator('li').first()).toContainText('Incomplete Todo 1');
+    await expect(list.locator('li').first()).not.toHaveClass(/completed/); // Verify class
     await expect(pageInfo).toHaveText('Page 1 of 2');
 
     // Navigate to next page
@@ -113,6 +114,7 @@ test.describe('Todos Page - Server-Side Separate Pagination', () => {
 
     await expect(list.locator('li')).toHaveCount(2);
     await expect(list.locator('li').first()).toContainText('Incomplete Todo 11');
+    await expect(list.locator('li').first()).not.toHaveClass(/completed/); // Verify class
     await expect(pageInfo).toHaveText('Page 2 of 2');
     await expect(nextBtn).toBeDisabled();
 
@@ -124,6 +126,7 @@ test.describe('Todos Page - Server-Side Separate Pagination', () => {
 
     await expect(list.locator('li')).toHaveCount(10);
     await expect(list.locator('li').first()).toContainText('Incomplete Todo 1');
+    await expect(list.locator('li').first()).not.toHaveClass(/completed/); // Verify class
     await expect(pageInfo).toHaveText('Page 1 of 2');
     await expect(prevBtn).toBeDisabled();
 
@@ -149,6 +152,7 @@ test.describe('Todos Page - Server-Side Separate Pagination', () => {
 
     await expect(list.locator('li')).toHaveCount(10);
     await expect(list.locator('li').first()).toContainText('Completed Todo 1');
+    await expect(list.locator('li').first()).toHaveClass(/completed/); // Verify class
     await expect(pageInfo).toHaveText('Page 1 of 2');
 
     const completedNextResponse = page.waitForResponse(resp => resp.url().includes('/api/todos?completed=true&page=2'));
@@ -158,6 +162,7 @@ test.describe('Todos Page - Server-Side Separate Pagination', () => {
 
     await expect(list.locator('li')).toHaveCount(2);
     await expect(list.locator('li').first()).toContainText('Completed Todo 11');
+    await expect(list.locator('li').first()).toHaveClass(/completed/); // Verify class
     await expect(pageInfo).toHaveText('Page 2 of 2');
 
     const completedPrevResponse = page.waitForResponse(resp => resp.url().includes('/api/todos?completed=true&page=1'));
@@ -167,6 +172,7 @@ test.describe('Todos Page - Server-Side Separate Pagination', () => {
 
     await expect(list.locator('li')).toHaveCount(10);
     await expect(list.locator('li').first()).toContainText('Completed Todo 1');
+    await expect(list.locator('li').first()).toHaveClass(/completed/); // Verify class
     await expect(pageInfo).toHaveText('Page 1 of 2');
   });
 
@@ -253,8 +259,9 @@ test.describe('Original Todos Page Functionality (Adapted for Server Pagination)
 
 
     await expect(page.locator('#incomplete-todos-list li', { hasText: 'Test Todo to Complete' })).not.toBeVisible();
-    const completedTodo = page.locator('#completed-todos-list li', { hasText: 'Test Todo to Complete' });
-    await expect(completedTodo).toBeVisible();
+    const completedTodoLocator = page.locator('#completed-todos-list li', { hasText: 'Test Todo to Complete' });
+    await expect(completedTodoLocator).toBeVisible();
+    await expect(completedTodoLocator).toHaveClass(/completed/); // Verify class
   });
 
   test('should edit a todo', async ({ page }) => {
