@@ -527,10 +527,34 @@ async function loadConversations(searchTerm = '') {
                 li.appendChild(triggerContainer);
                 const panel = document.createElement('div'); panel.classList.add('accordion-panel'); panel.innerHTML = (typeof markdownit === 'function' ? markdownit().render(conversation.summary || 'No detailed content available.') : (conversation.summary || 'No detailed content available.'));
                 if (conversation.state !== 'CAPTURING') {
-                    const icon = document.createElement('span'); icon.classList.add('accordion-icon'); icon.innerHTML = '&#8250;';
-                    li.appendChild(icon); li.appendChild(panel);
-                    li.addEventListener('click', (e) => { if (e.target.tagName === 'A' && panel.contains(e.target)) return; li.classList.toggle('active'); const currentPanel = li.querySelector('.accordion-panel'); if (currentPanel.style.maxHeight) { currentPanel.style.maxHeight = null; } else { currentPanel.style.maxHeight = currentPanel.scrollHeight + "px"; } });
-                } else { li.style.cursor = 'default'; }
+                    const icon = document.createElement('span');
+                    icon.classList.add('accordion-icon');
+                    icon.innerHTML = '&#8250;';
+                    li.appendChild(icon);
+                    li.appendChild(panel);
+
+                    // Only attach event listener to the triggerContainer
+                    triggerContainer.addEventListener('click', (e) => {
+                        // Prevent click from bubbling up to li if the click was on a link within the panel
+                        // This check might be redundant now but kept for safety.
+                        if (e.target.tagName === 'A' && panel.contains(e.target)) {
+                            return;
+                        }
+                        li.classList.toggle('active');
+                        const currentPanel = li.querySelector('.accordion-panel');
+                        if (currentPanel.style.maxHeight) {
+                            currentPanel.style.maxHeight = null;
+                        } else {
+                            currentPanel.style.maxHeight = currentPanel.scrollHeight + "px";
+                        }
+                    });
+                    // Add a cursor style to the triggerContainer to indicate it's clickable
+                    triggerContainer.style.cursor = 'pointer';
+
+                } else {
+                    li.style.cursor = 'default';
+                    triggerContainer.style.cursor = 'default'; // Ensure non-capturing items are not styled as clickable
+                }
                 ul.appendChild(li);
             });
             if(targetListDisplay) targetListDisplay.appendChild(ul);

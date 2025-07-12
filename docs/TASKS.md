@@ -76,6 +76,8 @@ This document outlines the development tasks for the Bee Web UI project.
         -   [x] Display conversation metadata (e.g., date, number of messages).
         -   [x] Allow users to view the full content of a conversation.
         -   [x] Implement a search or filter for conversations.
+        -   [x] Fix cursor issue on conversation accordion items (removed `cursor: pointer` from `.conversation-item` in `public/style.css`).
+        -   [x] Improve stability of Playwright test for conversation accordion expansion/collapse (`tests/conversations.spec.js`).
 -   **General UI/UX:**
     -   [x] Implement a search/filter for items on all pages.
     -   [x] Implement bulk actions (e.g., delete, confirm).
