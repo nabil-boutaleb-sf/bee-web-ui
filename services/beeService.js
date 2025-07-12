@@ -26,6 +26,11 @@ async function getTodos(completed, page = 1, limit = 10, searchTerm = '') {
     const response = await bee.getTodos('me', { completed, page: 1, limit: 1000 });
     let todos = response.todos || [];
 
+    // Explicitly filter by the 'completed' status to be certain,
+    // as the API/SDK might not be strictly filtering or items might lack the property consistently.
+    // This assumes todo items from the Bee API have a 'completed' boolean property.
+    todos = todos.filter(todo => typeof todo.completed === 'boolean' && todo.completed === completed);
+
     if (searchTerm) {
       todos = todos.filter(todo =>
         todo.text.toLowerCase().includes(searchTerm.toLowerCase())
