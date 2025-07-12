@@ -83,17 +83,17 @@ npx playwright test
 This command will:
 
 1.  Automatically start the application server (as configured in `playwright.config.js`).
-2.  Launch a browser (Chromium by default).
+2.  Launch a browser (Chromium by default, in headless mode).
 3.  Run the tests located in the `tests/` directory.
-4.  Generate an HTML test report (accessible by running `npx playwright show-report` after the tests complete).
+4.  By default, an HTML test report is generated. To view it, run `npx playwright show-report` after the tests complete.
 
-### Troubleshooting Playwright Tests
+To run tests and output results directly to the console (or a log file) without opening a browser report:
 
-If you encounter issues running Playwright tests (e.g., browser not launching, tests getting stuck):
-
-*   **Ensure Dev Container is Rebuilt:** After any changes to `Dockerfile` or `.devcontainer/devcontainer.json`, you *must* rebuild the dev container.
-*   **Missing Browser Dependencies:** If you see errors about missing browser executables or system dependencies, ensure you are using the recommended Playwright Dev Container image. If not, you might need to manually install them (e.g., `npx playwright install` for browsers, and `sudo apt-get install ...` for system dependencies if `npx playwright install-deps` fails).
-*   **Lingering Processes:** Sometimes, previous test runs can leave orphaned browser processes. While Playwright tries to clean up, if issues persist, you might need to manually terminate them (e.g., `pkill -f "(chrome|firefox|webkit|playwright)"`).
+```bash
+npx playwright test --reporter=list
+# Or to a log file:
+npx playwright test --reporter=list > playwright_test_results.log 2>&1
+```
 
 ## Project Structure
 

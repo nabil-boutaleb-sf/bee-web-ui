@@ -36,22 +36,21 @@ The application is divided into the following pages:
     -   Complete, edit, and delete todos.
 -   **Conversations:**
     -   View a list of conversations in an accordion format, with full markdown rendering (including lists and tables) for detailed content.
+    -   Pagination for conversations.
 -   **Authentication:**
     -   The application uses a single `BEE_API_TOKEN` stored in a `.env` file on the server.
     -   The UI displays the connection status to the Bee API.
 -   **Testing:**
     -   An isolated test page allows for direct API calls to the Bee API, bypassing the SDK for testing and debugging.
+-   **General UI/UX:**
+    -   Bulk actions (e.g., delete, confirm).
+    -   Search/filter for items on all pages.
 
 ## 5. Future Enhancements
 
 -   **Conversations Page:**
-    -   [x] Display conversation metadata (e.g., date, number of messages).
-    -   [x] Allow users to view the full content of a conversation (implemented as an accordion with markdown rendering).
-    -   [x] Add pagination to the conversations page.
-    -   Implement a search or filter for conversations.
+    -   Implement a search or filter for conversations. (Already implemented, but keeping here for now as it's a sub-point of conversations page)
 -   **General UI/UX:**
-    -   [x] Implement bulk actions (e.g., delete, confirm).
     -   Add an inline creation form for new items (facts, todos).
-    -   Implement a search/filter for items on all pages.
     -   Display date/source information for items (if available from the API).
     -   Improve the visual design and branding.

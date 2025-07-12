@@ -31,6 +31,18 @@ test.describe('Conversation Page Accordion', () => {
     // So, we check it's not explicitly "0px". A more robust check might be needed if scrollHeight is consistently 0 for some reason.
     await expect(accordionPanel).not.toHaveCSS('max-height', '0px');
 
+    // Wait for network to be idle after expansion, in case of images/external resources
+    await page.waitForLoadState('networkidle');
+
+    // Wait for the accordion panel's scrollHeight to stabilize
+    await page.waitForFunction(async (selector) => {
+      const panel = document.querySelector(selector);
+      if (!panel) return false; // Element might not be ready yet
+      const initialScrollHeight = panel.scrollHeight;
+      await new Promise(resolve => setTimeout(resolve, 250)); // Wait a longer period
+      const currentScrollHeight = panel.scrollHeight;
+      return initialScrollHeight === currentScrollHeight;
+    }, '.accordion-panel', { timeout: 5000 }); // Max 5 seconds wait for stabilization
 
     // 3. Panel should be expanded. Get its current height.
     const panelMaxHeightExpanded = await accordionPanel.evaluate(el => getComputedStyle(el).maxHeight);

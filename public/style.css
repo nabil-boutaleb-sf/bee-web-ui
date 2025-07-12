@@ -137,11 +137,14 @@ li:hover {
 /* Conversation List Item Specifics */
 .conversation-item {
     display: block; /* Override display:flex from the global li style */
-    cursor: pointer;
     position: relative; /* For positioning the icon */
+    /* No flex properties here to allow natural block-level rendering */
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
 }
 
 .conversation-item .trigger-container {
+    cursor: pointer; /* Apply cursor pointer only to the clickable trigger area */
     width: calc(100% - 30px); /* Leave space for the icon */
 }
 
@@ -299,7 +302,6 @@ nav a:hover {
 
 /* Accordion Styles */
 .conversation-item {
-    cursor: pointer;
     position: relative; /* For positioning the icon */
     /* No flex properties here to allow natural block-level rendering */
     padding: 1rem;
