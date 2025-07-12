@@ -883,7 +883,10 @@ async function loadConversations(searchTerm = '') {
                     li.appendChild(icon);
                     li.appendChild(panel);
 
-                    li.addEventListener('click', (e) => {
+                    // Only attach event listener to the triggerContainer
+                    triggerContainer.addEventListener('click', (e) => {
+                        // Prevent click from bubbling up to li if the click was on a link within the panel
+                        // This check might be redundant now but kept for safety.
                         if (e.target.tagName === 'A' && panel.contains(e.target)) {
                             return;
                         }
@@ -895,8 +898,12 @@ async function loadConversations(searchTerm = '') {
                             currentPanel.style.maxHeight = currentPanel.scrollHeight + "px";
                         }
                     });
+                    // Add a cursor style to the triggerContainer to indicate it's clickable
+                    triggerContainer.style.cursor = 'pointer';
+
                 } else {
                     li.style.cursor = 'default';
+                    triggerContainer.style.cursor = 'default'; // Ensure non-capturing items are not styled as clickable
                 }
                 ul.appendChild(li);
             });
