@@ -137,11 +137,14 @@ li:hover {
 /* Conversation List Item Specifics */
 .conversation-item {
     display: block; /* Override display:flex from the global li style */
-    cursor: pointer;
     position: relative; /* For positioning the icon */
+    /* No flex properties here to allow natural block-level rendering */
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
 }
 
 .conversation-item .trigger-container {
+    cursor: pointer; /* Apply cursor pointer only to the clickable trigger area */
     width: calc(100% - 30px); /* Leave space for the icon */
 }
 
@@ -299,7 +302,6 @@ nav a:hover {
 
 /* Accordion Styles */
 .conversation-item {
-    cursor: pointer;
     position: relative; /* For positioning the icon */
     /* No flex properties here to allow natural block-level rendering */
     padding: 1rem;
@@ -308,6 +310,15 @@ nav a:hover {
 
 .conversation-item .trigger-container {
     width: calc(100% - 30px); /* Leave space for the icon */
+    padding: 0.5rem; /* Add some padding for better hover appearance */
+    margin: -0.5rem; /* Counteract padding to maintain layout if parent has padding */
+    border-radius: 4px; /* Optional: for rounded corners on hover */
+    transition: background-color 0.2s ease-in-out; /* Smooth transition for hover */
+}
+
+/* Apply hover only if the trigger itself has cursor: pointer (set by JS for non-CAPTURING items) */
+.conversation-item .trigger-container[style*="cursor: pointer"]:hover {
+    background-color: #e9ecef; /* Subtle background change on hover */
 }
 
 .accordion-icon {
@@ -446,4 +457,15 @@ li form.edit-fact-form input.edit-fact-input {
 .pagination-container span {
     margin: 0 10px;
     font-size: 1em;
+}
+
+/* Metadata Styles */
+.metadata {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.metadata-item {
+    margin-right: 1rem;
 }

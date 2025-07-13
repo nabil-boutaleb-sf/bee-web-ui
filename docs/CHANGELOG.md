@@ -35,7 +35,7 @@ This document outlines the recent changes made to the Bee Web UI application.
 #### Further Development (July 3, 2025)
 
 - **Recap of Recent Changes**: Reviewed recent commits, which included repairing the test page, organizing project files, and adding the `beeai` SDK. The `app.js` file was also modified to address the "stuck on loading" issue.
-- **Facts Functionality Expanded**: Based on user feedback, the requirements for the "Facts" page have been clarified and expanded. The UI will now explicitly show both confirmed and unconfirmed facts, with buttons to "Confirm" unconfirmed facts and "Delete" any fact. All relevant documentation (`DESIGN.md`, `TASKS.md`, `test_cases.md`) has been updated to reflect this more detailed requirement.
+- **Facts Functionality Expanded**: Based on user feedback, the requirements for the "Facts" page have been clarified and expanded. The UI will now explicitly show both confirmed and unconfirmed facts, with buttons to "Confirm" unconfirmed facts and "Delete" any fact. All relevant documentation (`DESIGN.2md`, `TASKS.md`, `test_cases.md`) has been updated to reflect this more detailed requirement.
 - **Facts Page Implementation**: Implemented the expanded facts page functionality. This included:
     - Fixing a bug where `bee.confirmFact` was not a function by replacing it with the correct `bee.updateFact` method from the SDK documentation.
     - Improving the UI with a more modern stylesheet.
@@ -75,8 +75,8 @@ This document outlines the recent changes made to the Bee Web UI application.
 ### Further Development (July 8, 2025)
 
 - **Suggested Todos Investigation:**
-    - Investigated the Bee.computer API and SDK for a "suggested" or "unconfirmed" parameter for todos. This confirmed that no such parameter is explicitly documented or discoverable via direct API calls. 
-    - Contacted the Bee.computer developers for clarification.                     
+    - Investigated the Bee.computer API and SDK for a "suggestion" or "unconfirmed" parameter for todos. This confirmed that no such parameter is explicitly documented or discoverable via direct API calls.
+    - Contacted the Bee.computer developers for clarification.
     - After contacting the Bee.computer developers, the investigation continued by analyzing the `suggested-todos.mp4` video. This revealed that suggestions are a distinct item type, leading to a new hypothesis that they are delivered via a WebSocket connection.
     - Created a `websocket-test.js` script to listen for events from the Bee API server to test this hypothesis at a later time.
     - Updated `TASKS.md` and `CHANGELOG.md` to accurately reflect the investigation's timeline and current status.
@@ -89,7 +89,7 @@ This document outlines the recent changes made to the Bee Web UI application.
         - Increased the main content area width (`.main-wide`) for better use of screen space.
         - Made conversation titles (`short_summary`) more prominent using `<h3>` tags.
         - Added a chevron icon and a text fade-out effect to visually indicate expandability and hidden content in the accordion.
-    - **Markdown Rendering & Layout Debugging:**
+    **Markdown Rendering & Layout Debugging:**
         - **Initial Markdown Parser Issue:** Identified that `marked.js` was not correctly rendering bullet points and tables, causing them to appear as broken "cells."
         - **Library Swap Attempt:** Replaced `marked.js` with `markdown-it.js` to address markdown parsing inconsistencies.
         - **Loading Issue & CDN Fix:** Discovered that `markdown-it.js` was not loading due to an incorrect CDN link (pointing to a Cloudflare login page). The CDN link was corrected to a valid jsDelivr URL.
@@ -119,3 +119,41 @@ This document outlines the recent changes made to the Bee Web UI application.
     - **Root Cause:** The container environment was missing essential system-level browser dependencies, and the Playwright browser binaries were not installed.
     - **Solution:** Migrated the development container to use an official Playwright Docker image (`mcr.microsoft.com/playwright:v1.44.0-jammy`), which includes all necessary browsers and system dependencies pre-installed. Updated `Dockerfile` and `.devcontainer/devcontainer.json` accordingly.
     - **Debugging Steps:** Involved systematically checking server startup, browser navigation to external sites, and analyzing Playwright's detailed error messages to pinpoint the missing dependencies.
+
+### Further Development (July 12, 2025)
+
+- **Todos Pagination Enhancements:**
+    - Added necessary pagination placeholder `div` elements to `public/todos.html` to ensure pagination controls are rendered correctly.
+    - Implemented explicit filtering in `services/beeService.js` for todos based on their `completed` status, addressing an issue where incomplete todos were appearing in the completed list due to inconsistencies in the Bee AI SDK's filtering.
+- **Playwright Configuration:**
+    - Configured Playwright to run in headless mode in `playwright.config.js` to resolve issues with launching a headed browser in environments without an X server.
+- **Conversation Accordion Cursor Fix:**
+    - Addressed a UI issue where the cursor was a "clicker" pointer outside the clickable area of conversation accordion items. The `cursor: pointer` style was removed from the main `.conversation-item` CSS rule in `public/style.css`, ensuring it is only applied to the interactive `.trigger-container` element.
+- **Playwright Test Stability:**
+    - Improved the stability of the Playwright test for conversation accordion expansion and collapse (`tests/conversations.spec.js`). This was achieved by adding a `page.waitForLoadState('networkidle')` and increasing the `setTimeout` duration within the `page.waitForFunction` call, ensuring the accordion panel's content fully settles before `maxHeight` is captured.
+
+#### Further Development (July 13, 2025)
+
+- **Display Creation Date for Facts and Todos:**
+    - Implemented displaying `created_at` metadata for facts and todos in the UI.
+    - Corrected the field name from `createdAt` to `created_at` based on API response.
+    - Added styling for the metadata.
+- **API Key Submission System:**
+    - Implemented a session-based API key submission system.
+    - Users can now input their API key on the home page if none is found in the `.env` file.
+    - The key is stored securely in a server-side session.
+    - Updated `index.js` to use `express-session` and pass the API key to `beeService.js`.
+    - Updated `beeService.js` functions to accept the API key.
+    - Updated `public/index.html` with the API key input form and a clearer message.
+    - Updated `public/app.js` to handle the new API key form and auth flow.
+- **Documentation Updates:**
+    - Updated `GEMINI.md` with the new testing protocol, clarifying manual testing.
+    - Updated `README.md` to document the new API key submission feature.
+    - Updated `DESIGN.md` to describe the new dynamic token system.
+    - Updated `TASKS.md` with new sections for future improvements.
+- **Testing Improvements:**
+    - Added new Playwright tests for the API key submission feature (`tests/auth.spec.js`).
+    - Fixed Playwright configuration to not open the report automatically.
+    - Fixed failing authentication tests by improving mocking strategy and waiting for UI elements.
+- **UI/UX Refinement:**
+    - Made the API key input field similar to search fields on other pages.
