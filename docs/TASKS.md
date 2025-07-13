@@ -25,6 +25,7 @@ This document outlines the development tasks for the Bee Web UI project.
 ## Project Organization
 - [ ] **Centralize Generated Files:** Ensure all generated files (e.g., test results, reports, logs) are directed to and stored within the `logs/` directory.
 - [ ] **Remove Redundant Docs Folder:** Delete the `docs/bee extra docs` folder as its contents are no longer needed or are redundant.
+- [ ] **Implement Multi-Stage Docker Build:** Create a slim production Docker image using multi-stage builds and a separate, heavier development Dockerfile for the Dev Container.
 
 ## Completed Tasks
 
@@ -113,3 +114,5 @@ This document outlines the development tasks for the Bee Web UI project.
 -   **UI/UX:**
     -   [x] Refine the API key input message.
     -   [x] Make the API key input field similar to search fields on other pages.
+-   **Deployment:**
+    -   [x] Deploy application to Render.com.

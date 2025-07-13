@@ -157,3 +157,7 @@ This document outlines the recent changes made to the Bee Web UI application.
     - Fixed failing authentication tests by improving mocking strategy and waiting for UI elements.
 - **UI/UX Refinement:**
     - Made the API key input field similar to search fields on other pages.
+- **Deployment:**
+    - Deployed the application live to Render.com: [https://bee-web-ui.onrender.com](https://bee-web-ui.onrender.com).
+    - Corrected API key acquisition link on the home page to `https://developer.bee.computer`.
+    - Documented cron job setup for Render to prevent free tier spin-down.
