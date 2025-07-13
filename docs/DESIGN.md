@@ -37,8 +37,11 @@ The application is divided into the following pages:
 -   **Conversations:**
     -   View a list of conversations in an accordion format, with full markdown rendering (including lists and tables) for detailed content.
     -   Pagination for conversations.
+    -   Search/filter for conversations.
 -   **Authentication:**
-    -   The application uses a single `BEE_API_TOKEN` stored in a `.env` file on the server.
+    -   The application supports two methods for API authentication:
+        1.  A `BEE_API_TOKEN` can be stored in a `.env` file on the server for persistent configuration.
+        2.  If the token is not provided in the `.env` file, the user is prompted to enter it in the UI. The token is then stored securely in a server-side session for the duration of the visit.
     -   The UI displays the connection status to the Bee API.
 -   **Testing:**
     -   An isolated test page allows for direct API calls to the Bee API, bypassing the SDK for testing and debugging.
@@ -48,8 +51,6 @@ The application is divided into the following pages:
 
 ## 5. Future Enhancements
 
--   **Conversations Page:**
-    -   Implement a search or filter for conversations. (Already implemented, but keeping here for now as it's a sub-point of conversations page)
 -   **General UI/UX:**
     -   Add an inline creation form for new items (facts, todos).
     -   Display date/source information for items (if available from the API).

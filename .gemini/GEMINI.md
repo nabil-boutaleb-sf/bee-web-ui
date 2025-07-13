@@ -35,9 +35,18 @@ The project is built with a Node.js/Express backend that serves a vanilla HTML, 
     - **Terminal Command Execution:** When running terminal commands that might take a long time or block interaction, prefer running them in the background using `&` and redirecting their output to a file for later review.
 - **Commit Strategy:** Make frequent, atomic commits to the local branch to save progress. Before pushing to the remote, these smaller commits should be squashed into a single, meaningful commit that represents a complete feature or fix. This keeps the remote history clean and readable.
 
+## Testing Protocol
+
+Before any changes are committed, the following testing protocol must be followed:
+
+1.  **Write Automated Tests:** For any new feature or significant change, corresponding automated tests (e.g., Playwright for end-to-end tests) must be created to validate the new functionality.
+2.  **Execute Automated Tests:** All relevant automated tests must be executed to ensure that the changes have not introduced any regressions.
+3.  **Perform Manual Testing:** After the automated tests pass, the user will perform final manual testing. The agent should stop any running servers and hand over control to the user for this purpose.
+4.  **Commit-Readiness:** Only after the new tests pass and the user confirms the manual check is complete are the changes considered ready to be committed.
+
 ## Current Project Status
 
 - **Facts Page:** Considered feature-complete for the initial requirements.
-- **Todos Page:** Functionality has been expanded to include editing, but there are known issues with pagination and loading.
-- **Conversations Page:** Very basic implementation that needs significant improvement to be useful.
+- **Todos Page:** Functionality has been expanded to include editing, pagination, and search. The known issues with pagination and loading have been addressed.
+- **Conversations Page:** Significant improvements have been made, including an accordion UI for displaying full content, pagination, and search functionality. The cursor display issue has also been resolved.
 - **Test Page:** Functioning as an independent test environment for the Bee API.

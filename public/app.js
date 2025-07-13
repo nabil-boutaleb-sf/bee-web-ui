@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const authStatusDiv = document.getElementById('auth-status');
+    const apiKeyFormContainer = document.getElementById('api-key-form-container');
+    const apiKeyForm = document.getElementById('api-key-form');
     const factsContainer = document.getElementById('facts-container');
     const conversationsContainer = document.getElementById('conversations-container');
     const todosContainer = document.getElementById('todos-container');
@@ -12,15 +14,55 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data.isAuthenticated) {
                 authStatusDiv.textContent = 'Status: Connected to Bee API';
                 authStatusDiv.style.color = 'green';
+                if(apiKeyFormContainer) apiKeyFormContainer.style.display = 'none';
             } else {
-                authStatusDiv.textContent = 'Status: Not connected to Bee API. Check your token.';
+                authStatusDiv.textContent = 'Status: Not connected to Bee API. Please provide a key.';
                 authStatusDiv.style.color = 'red';
+                if(apiKeyFormContainer) apiKeyFormContainer.style.display = 'block';
             }
         } catch (error) {
             console.error('Error fetching authentication status:', error);
             authStatusDiv.textContent = 'Status: Error checking connection.';
             authStatusDiv.style.color = 'orange';
         }
+    }
+
+    if (apiKeyForm) {
+        apiKeyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = document.getElementById('api-key-input').value;
+            if (!token) {
+                alert('Please enter an API key.');
+                return;
+            }
+            try {
+                const response = await fetch('/api/auth/set-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                if (response.ok) {
+                    // Re-check status to confirm connection
+                    const statusResponse = await fetch('/api/auth/status');
+                    const statusData = await statusResponse.json();
+                    if (statusData.isAuthenticated) {
+                        authStatusDiv.textContent = 'Status: Connected to Bee API';
+                        authStatusDiv.style.color = 'green';
+                        if(apiKeyFormContainer) apiKeyFormContainer.style.display = 'none';
+                    } else {
+                        alert('The provided API key is invalid. Please try again.');
+                        authStatusDiv.textContent = 'Status: Not connected to Bee API. Invalid key.';
+                        authStatusDiv.style.color = 'red';
+                    }
+                } else {
+                    const errorData = await response.json();
+                    alert(`Failed to set API key: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error('Error setting API key:', error);
+                alert('An error occurred while trying to set the API key.');
+            }
+        });
     }
 
     // --- Todos Page (for todos.html) ---

@@ -18,6 +18,26 @@ This document outlines the development tasks for the Bee Web UI project.
     - [ ] Add an inline creation form for new items (facts, todos).
     - [ ] Improve the visual design and branding.
 
+## Future Usability Improvements
+- **Onboarding:** Create a more guided onboarding experience for new users, explaining how to get an API key and the purpose of the application.
+- **Error Handling:** Provide more specific and user-friendly error messages in the UI instead of generic "failed to..." alerts.
+- **Loading Indicators:** Implement more granular loading indicators (e.g., spinners on individual buttons) to provide better feedback during API requests.
+- **Empty States:** Improve the "empty state" messages (e.g., "No todos found") with more helpful text and perhaps a button to create a new item.
+- **Configuration:** Add a settings page where users can manage their API key and other preferences.
+
+## Untapped API Features
+- **Create Facts:** Implement functionality to create new facts (`createFact`).
+- **Create Todos:** Implement functionality to create new todos (`createTodo`).
+- **Get Single Item:** Use `getFact` and `getTodo` to create a detail view for individual items, which might contain more information than the list view.
+- **Conversation Management:**
+    - `getConversation`: Fetch and display a single, detailed conversation.
+    - `endConversation`: Allow users to manually end a conversation.
+    - `retryConversation`: Allow users to retry a conversation that may have failed.
+- **Location Data:**
+    - `getLocations`: Display a map or list of locations associated with conversations.
+- **WebSockets:**
+    - Use the `connect`, `disconnect`, and `on` methods to listen for real-time events from the Bee API, such as new suggested todos or conversation updates.
+
 ## Completed Tasks
 
 -   **Setup & Foundation:**
@@ -90,3 +110,17 @@ This document outlines the development tasks for the Bee Web UI project.
     -   [x] Configure `playwright.config.js` to run tests against the local server.
     -   [x] Resolve environment issues preventing Playwright from running (missing browser binaries and system dependencies).
     -   [x] Migrate to an official Playwright Docker image for a pre-configured testing environment.
+-   **Authentication:**
+    -   [x] Implement session-based authentication to allow users to enter their API key in the UI.
+    -   [x] Update all relevant service functions to use the session-based API key.
+    -   [x] Add a form to the home page for API key submission.
+    -   [x] Write Playwright tests for the new authentication flow.
+    -   [x] Fix Playwright configuration to not open the report automatically.
+    -   [x] Fix failing authentication tests.
+-   **Documentation:**
+    -   [x] Update `GEMINI.md` with the new testing protocol.
+    -   [x] Update `README.md` with the new API key functionality.
+    -   [x] Update `DESIGN.md` with the new authentication system.
+    -   [x] Update `TASKS.md` with new sections for future improvements.
+-   **UI/UX:**
+    -   [x] Refine the API key input message.

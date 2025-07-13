@@ -1,8 +1,9 @@
 const Bee = require('beeai');
 
-const bee = new Bee({ apiKey: process.env.BEE_API_TOKEN });
+const getBeeInstance = (apiKey) => new Bee({ apiKey });
 
-async function deleteFact(factId) {
+async function deleteFact(apiKey, factId) {
+  const bee = getBeeInstance(apiKey);
   try {
     await bee.deleteFact('me', factId);
   } catch (error) {
@@ -11,7 +12,8 @@ async function deleteFact(factId) {
   }
 }
 
-async function confirmFact(factId) {
+async function confirmFact(apiKey, factId) {
+  const bee = getBeeInstance(apiKey);
   try {
     await bee.updateFact('me', factId, { confirmed: true });
   } catch (error) {
@@ -20,27 +22,19 @@ async function confirmFact(factId) {
   }
 }
 
-async function getTodos(completed, page = 1, limit = 10, searchTerm = '') {
+async function getTodos(apiKey, completed, page = 1, limit = 10, searchTerm = '') {
+  const bee = getBeeInstance(apiKey);
   try {
-    // Fetch all todos for the given 'completed' state, then filter by search term.
     const response = await bee.getTodos('me', { completed, page: 1, limit: 1000 });
     let todos = response.todos || [];
-
-    // Explicitly filter by the 'completed' status to be certain,
-    // as the API/SDK might not be strictly filtering or items might lack the property consistently.
-    // This assumes todo items from the Bee API have a 'completed' boolean property.
     todos = todos.filter(todo => typeof todo.completed === 'boolean' && todo.completed === completed);
-
     if (searchTerm) {
       todos = todos.filter(todo =>
         todo.text.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
-    // Paginate the filtered results.
     const totalPages = Math.ceil(todos.length / limit);
     const paginatedTodos = todos.slice((page - 1) * limit, page * limit);
-
     return {
       todos: paginatedTodos,
       totalPages: totalPages,
@@ -51,9 +45,9 @@ async function getTodos(completed, page = 1, limit = 10, searchTerm = '') {
   }
 }
 
-async function checkAuthStatus() {
+async function checkAuthStatus(apiKey) {
+  const bee = getBeeInstance(apiKey);
   try {
-    // Attempt to fetch facts as a way to verify authentication
     await bee.getFacts('me'); 
     return true;
   } catch (error) {
@@ -62,22 +56,18 @@ async function checkAuthStatus() {
   }
 }
 
-async function getFacts(confirmed, page = 1, limit = 10, searchTerm = '') {
+async function getFacts(apiKey, confirmed, page = 1, limit = 10, searchTerm = '') {
+  const bee = getBeeInstance(apiKey);
   try {
-    // Fetch all facts for the given 'confirmed' state, then filter by search term.
     const response = await bee.getFacts('me', { confirmed, page: 1, limit: 1000 });
     let facts = response.facts || [];
-
     if (searchTerm) {
       facts = facts.filter(fact =>
         fact.text.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
-    // Paginate the filtered results.
     const totalPages = Math.ceil(facts.length / limit);
     const paginatedFacts = facts.slice((page - 1) * limit, page * limit);
-
     return {
       facts: paginatedFacts,
       totalPages: totalPages,
@@ -88,7 +78,8 @@ async function getFacts(confirmed, page = 1, limit = 10, searchTerm = '') {
   }
 }
 
-async function completeTodo(todoId) {
+async function completeTodo(apiKey, todoId) {
+  const bee = getBeeInstance(apiKey);
   try {
     await bee.updateTodo('me', todoId, { completed: true });
   } catch (error) {
@@ -97,7 +88,8 @@ async function completeTodo(todoId) {
   }
 }
 
-async function deleteTodo(todoId) {
+async function deleteTodo(apiKey, todoId) {
+  const bee = getBeeInstance(apiKey);
   try {
     await bee.deleteTodo('me', todoId);
   } catch (error) {
@@ -106,7 +98,8 @@ async function deleteTodo(todoId) {
   }
 }
 
-async function updateTodo(todoId, text) {
+async function updateTodo(apiKey, todoId, text) {
+    const bee = getBeeInstance(apiKey);
     try {
         await bee.updateTodo('me', todoId, { text });
     } catch (error) {
@@ -115,7 +108,8 @@ async function updateTodo(todoId, text) {
     }
 }
 
-async function unconfirmFact(factId) {
+async function unconfirmFact(apiKey, factId) {
+  const bee = getBeeInstance(apiKey);
   try {
     await bee.updateFact('me', factId, { confirmed: false });
   } catch (error) {
@@ -124,7 +118,8 @@ async function unconfirmFact(factId) {
   }
 }
 
-async function updateFact(factId, text) {
+async function updateFact(apiKey, factId, text) {
+  const bee = getBeeInstance(apiKey);
   try {
     await bee.updateFact('me', factId, { text });
   } catch (error) {
@@ -133,21 +128,19 @@ async function updateFact(factId, text) {
   }
 }
 
-async function getConversations(page = 1, limit = 10, searchTerm = '') {
+async function getConversations(apiKey, page = 1, limit = 10, searchTerm = '') {
+  const bee = getBeeInstance(apiKey);
   try {
-    const response = await bee.getConversations('me', { limit: 1000 }); // Fetch a large number
+    const response = await bee.getConversations('me', { limit: 1000 });
     let conversations = response.conversations || [];
-
     if (searchTerm) {
       conversations = conversations.filter(conv =>
         (conv.summary && conv.summary.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (conv.short_summary && conv.short_summary.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-
     const totalPages = Math.ceil(conversations.length / limit);
     const paginatedConversations = conversations.slice((page - 1) * limit, page * limit);
-
     return {
       conversations: paginatedConversations,
       totalPages: totalPages
@@ -158,33 +151,33 @@ async function getConversations(page = 1, limit = 10, searchTerm = '') {
   }
 }
 
-async function bulkDeleteTodos(todoIds) {
+async function bulkDeleteTodos(apiKey, todoIds) {
     for (const todoId of todoIds) {
-        await deleteTodo(todoId);
+        await deleteTodo(apiKey, todoId);
     }
 }
 
-async function bulkCompleteTodos(todoIds) {
+async function bulkCompleteTodos(apiKey, todoIds) {
     for (const todoId of todoIds) {
-        await completeTodo(todoId);
+        await completeTodo(apiKey, todoId);
     }
 }
 
-async function bulkDeleteFacts(factIds) {
+async function bulkDeleteFacts(apiKey, factIds) {
     for (const factId of factIds) {
-        await deleteFact(factId);
+        await deleteFact(apiKey, factId);
     }
 }
 
-async function bulkConfirmFacts(factIds) {
+async function bulkConfirmFacts(apiKey, factIds) {
     for (const factId of factIds) {
-        await confirmFact(factId);
+        await confirmFact(apiKey, factId);
     }
 }
 
-async function bulkUnconfirmFacts(factIds) {
+async function bulkUnconfirmFacts(apiKey, factIds) {
     for (const factId of factIds) {
-        await unconfirmFact(factId);
+        await unconfirmFact(apiKey, factId);
     }
 }
 
@@ -206,3 +199,4 @@ module.exports = {
   bulkConfirmFacts,
   bulkUnconfirmFacts
 };
+

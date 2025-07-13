@@ -75,7 +75,7 @@ This document outlines the recent changes made to the Bee Web UI application.
 ### Further Development (July 8, 2025)
 
 - **Suggested Todos Investigation:**
-    - Investigated the Bee.computer API and SDK for a "suggested" or "unconfirmed" parameter for todos. This confirmed that no such parameter is explicitly documented or discoverable via direct API calls.
+    - Investigated the Bee.computer API and SDK for a "suggestion" or "unconfirmed" parameter for todos. This confirmed that no such parameter is explicitly documented or discoverable via direct API calls.
     - Contacted the Bee.computer developers for clarification.
     - After contacting the Bee.computer developers, the investigation continued by analyzing the `suggested-todos.mp4` video. This revealed that suggestions are a distinct item type, leading to a new hypothesis that they are delivered via a WebSocket connection.
     - Created a `websocket-test.js` script to listen for events from the Bee API server to test this hypothesis at a later time.
@@ -131,3 +131,29 @@ This document outlines the recent changes made to the Bee Web UI application.
     - Addressed a UI issue where the cursor was a "clicker" pointer outside the clickable area of conversation accordion items. The `cursor: pointer` style was removed from the main `.conversation-item` CSS rule in `public/style.css`, ensuring it is only applied to the interactive `.trigger-container` element.
 - **Playwright Test Stability:**
     - Improved the stability of the Playwright test for conversation accordion expansion and collapse (`tests/conversations.spec.js`). This was achieved by adding a `page.waitForLoadState('networkidle')` and increasing the `setTimeout` duration within the `page.waitForFunction` call, ensuring the accordion panel's content fully settles before `maxHeight` is captured.
+
+#### Further Development (July 13, 2025)
+
+- **Display Creation Date for Facts and Todos:**
+    - Implemented displaying `created_at` metadata for facts and todos in the UI.
+    - Corrected the field name from `createdAt` to `created_at` based on API response.
+    - Added styling for the metadata.
+- **API Key Submission System:**
+    - Implemented a session-based API key submission system.
+    - Users can now input their API key on the home page if none is found in the `.env` file.
+    - The key is stored securely in a server-side session.
+    - Updated `index.js` to use `express-session` and pass the API key to `beeService.js`.
+    - Updated `beeService.js` functions to accept the API key.
+    - Updated `public/index.html` with the API key input form and a clearer message.
+    - Updated `public/app.js` to handle the new API key form and auth flow.
+- **Documentation Updates:**
+    - Updated `GEMINI.md` with the new testing protocol, clarifying manual testing.
+    - Updated `README.md` to document the new API key submission feature.
+    - Updated `DESIGN.md` to describe the new dynamic token system.
+    - Updated `TASKS.md` with "Future Usability Improvements" and "Untapped API Features" sections.
+- **Testing Improvements:**
+    - Added new Playwright tests for the API key submission feature (`tests/auth.spec.js`).
+    - Fixed Playwright configuration to prevent the HTML report from opening automatically.
+    - Fixed failing authentication tests by improving mocking strategy and waiting for UI elements.
+- **UI/UX Refinement:**
+    - Made the API key input field similar to search fields on other pages.

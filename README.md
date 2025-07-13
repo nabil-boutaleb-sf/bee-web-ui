@@ -52,11 +52,13 @@ If you prefer not to use Dev Containers:
 
 3.  **Configure API Token:**
 
-    Create a `.env` file in the project root and add your Bee API token:
+    You have two options for providing your Bee API token:
 
-    ```
-    BEE_API_TOKEN=your_bee_api_token_here
-    ```
+    -   **Option A (Recommended for Developers):** Create a `.env` file in the project root and add your Bee API token. This is the most secure method as the token is never exposed to the browser.
+        ```
+        BEE_API_TOKEN=your_bee_api_token_here
+        ```
+    -   **Option B (For Quick Use):** If you do not provide a `.env` file, the application will prompt you to enter your API key directly in the browser when you first visit the home page. The key is stored securely in a server-side session for the duration of your visit and is not saved in the browser's long-term storage.
 
 ### Running the Application
 
