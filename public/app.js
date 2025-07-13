@@ -168,6 +168,14 @@ function renderTodoListItems(listElement, todos, type, isCompletedList) {
             textSpan.classList.add('item-text');
             li.appendChild(textSpan);
 
+            if (todo.created_at) {
+                const metadataDiv = document.createElement('div');
+                metadataDiv.classList.add('metadata');
+                const createdAt = new Date(todo.created_at).toLocaleString();
+                metadataDiv.innerHTML = `<span class="metadata-item">Created: ${createdAt}</span>`;
+                li.appendChild(metadataDiv);
+            }
+
             const buttonContainer = document.createElement('div');
             buttonContainer.classList.add('button-container');
 
@@ -415,6 +423,15 @@ async function loadConfirmedFacts(searchTerm = '') {
                 li.classList.add('confirmed');
                 const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.classList.add('fact-checkbox'); checkbox.dataset.factId = fact.id; li.appendChild(checkbox);
                 const textSpan = document.createElement('span'); textSpan.textContent = fact.text; textSpan.classList.add('item-text'); li.appendChild(textSpan);
+
+                if (fact.created_at) {
+                    const metadataDiv = document.createElement('div');
+                    metadataDiv.classList.add('metadata');
+                    const createdAt = new Date(fact.created_at).toLocaleString();
+                    metadataDiv.innerHTML = `<span class="metadata-item">Created: ${createdAt}</span>`;
+                    li.appendChild(metadataDiv);
+                }
+
                 const buttonContainer = document.createElement('div'); buttonContainer.classList.add('button-container');
                 const unconfirmButton = document.createElement('button'); unconfirmButton.innerHTML = '<i class="fas fa-times"></i>'; unconfirmButton.classList.add('icon-btn', 'unconfirm-btn'); unconfirmButton.onclick = () => unconfirmFact(fact.id); buttonContainer.appendChild(unconfirmButton);
                 const editButton = document.createElement('button'); editButton.innerHTML = '<i class="fas fa-edit"></i>'; editButton.classList.add('icon-btn', 'edit-btn'); editButton.onclick = () => editFact(li, fact.id, fact.text); buttonContainer.appendChild(editButton);
@@ -463,6 +480,15 @@ async function loadUnconfirmedFacts(searchTerm = '') {
                 const li = document.createElement('li'); li.dataset.factId = fact.id; li.classList.add('unconfirmed');
                 const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.classList.add('fact-checkbox'); checkbox.dataset.factId = fact.id; li.appendChild(checkbox);
                 const textSpan = document.createElement('span'); textSpan.textContent = fact.text; textSpan.classList.add('item-text'); li.appendChild(textSpan);
+
+                if (fact.created_at) {
+                    const metadataDiv = document.createElement('div');
+                    metadataDiv.classList.add('metadata');
+                    const createdAt = new Date(fact.created_at).toLocaleString();
+                    metadataDiv.innerHTML = `<span class="metadata-item">Created: ${createdAt}</span>`;
+                    li.appendChild(metadataDiv);
+                }
+
                 const buttonContainer = document.createElement('div'); buttonContainer.classList.add('button-container');
                 const confirmButton = document.createElement('button'); confirmButton.innerHTML = '<i class="fas fa-check"></i>'; confirmButton.classList.add('icon-btn', 'confirm-btn'); confirmButton.onclick = () => confirmFact(fact.id); buttonContainer.appendChild(confirmButton);
                 const editButton = document.createElement('button'); editButton.innerHTML = '<i class="fas fa-edit"></i>'; editButton.classList.add('icon-btn', 'edit-btn'); editButton.onclick = () => editFact(li, fact.id, fact.text); buttonContainer.appendChild(editButton);

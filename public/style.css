@@ -458,3 +458,14 @@ li form.edit-fact-form input.edit-fact-input {
     margin: 0 10px;
     font-size: 1em;
 }
+
+/* Metadata Styles */
+.metadata {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.metadata-item {
+    margin-right: 1rem;
+}
