@@ -6,6 +6,8 @@ A user-friendly, personal web UI to manage your `bee.computer` todos and facts.
 
 This project provides a simple interface for managing the `Bee` via the web. It was created to provide a web interface, making it easier to review in bulk.
 
+**Live Demo:** [https://bee-web-ui.onrender.com](https://bee-web-ui.onrender.com) (Please note that the server can fall asleep, and may take a couple of minutes to wake up. Optimizations to come)
+
 The application is built with a Node.js/Express backend that serves a vanilla HTML, CSS, and JavaScript frontend. The backend acts as a secure proxy to the Bee API, using the official `beeai` npm package to protect your `BEE_API_TOKEN`.
 
 ## Features
