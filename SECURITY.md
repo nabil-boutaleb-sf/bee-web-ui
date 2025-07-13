@@ -4,16 +4,16 @@
 
 We take the security of the Bee Web UI seriously. If you discover a security vulnerability, please report it to us as soon as possible. We appreciate your efforts to responsibly disclose your findings.
 
-**Please do NOT open a public GitHub issue.**
+Please report vulnerabilities by opening a **GitHub Issue** in this repository. 
 
-Instead, please send an email to [your-security-email@example.com] (replace with your actual security contact email) with the following information:
+When creating the issue, please:
 
-*   A clear and concise description of the vulnerability.
-*   Steps to reproduce the vulnerability.
-*   The potential impact of the vulnerability.
-*   Any suggested mitigations or fixes (if applicable).
+*   Provide a clear and concise description of the vulnerability.
+*   Include steps to reproduce the vulnerability.
+*   Describe the potential impact.
+*   Suggest any mitigations or fixes (if applicable).
 
-We will acknowledge your report within 24-48 hours and provide a more detailed response within 7 days. We will keep you informed of our progress as we investigate and address the issue.
+If the vulnerability is highly sensitive and you prefer not to disclose it publicly even in an issue, please indicate this in the issue title (e.g., "[Sensitive] Vulnerability Report"), and we will follow up with you privately to gather more details. We will acknowledge your report within 24-48 hours and provide a more detailed response within 7 days.
 
 ## Security Best Practices for Users
 
