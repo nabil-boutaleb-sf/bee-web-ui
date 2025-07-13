@@ -20,5 +20,4 @@ If the vulnerability is highly sensitive and you prefer not to disclose it publi
 When using the Bee Web UI, especially on shared or public computers, please consider the following:
 
 *   **API Key Storage:** While the application stores your API key securely in a server-side session, it's tied to your browser session. To ensure maximum security, **always clear your browser's cookies and site data for `localhost:3000` (or your deployed domain) after your session, especially if you are using a shared computer.**
-*   **Strong API Keys:** Use a strong, unique API key from Bee.computer.
 *   **Keep Software Updated:** Ensure your browser and operating system are kept up-to-date to benefit from the latest security patches.

@@ -150,10 +150,10 @@ This document outlines the recent changes made to the Bee Web UI application.
     - Updated `GEMINI.md` with the new testing protocol, clarifying manual testing.
     - Updated `README.md` to document the new API key submission feature.
     - Updated `DESIGN.md` to describe the new dynamic token system.
-    - Updated `TASKS.md` with "Future Usability Improvements" and "Untapped API Features" sections.
+    - Updated `TASKS.md` with new sections for future improvements.
 - **Testing Improvements:**
     - Added new Playwright tests for the API key submission feature (`tests/auth.spec.js`).
-    - Fixed Playwright configuration to prevent the HTML report from opening automatically.
+    - Fixed Playwright configuration to not open the report automatically.
     - Fixed failing authentication tests by improving mocking strategy and waiting for UI elements.
 - **UI/UX Refinement:**
     - Made the API key input field similar to search fields on other pages.

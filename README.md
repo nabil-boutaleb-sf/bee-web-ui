@@ -4,7 +4,7 @@ A user-friendly, personal web UI to manage your `bee.computer` todos and facts.
 
 ## Overview
 
-This project provides a simple interface for managing "todos" and "facts" from the `bee.computer` API. It was created to address the difficulty of editing and deleting these items in the official UI.
+This project provides a simple interface for managing the `Bee` via the web. It was created to provide a web interface, making it easier to review in bulk.
 
 The application is built with a Node.js/Express backend that serves a vanilla HTML, CSS, and JavaScript frontend. The backend acts as a secure proxy to the Bee API, using the official `beeai` npm package to protect your `BEE_API_TOKEN`.
 

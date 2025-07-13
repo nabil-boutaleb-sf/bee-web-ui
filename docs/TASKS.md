@@ -4,6 +4,7 @@ This document outlines the development tasks for the Bee Web UI project.
 
 ## High Priority
 - [ ] **Implement Fact Creation:** The test 'should filter unconfirmed facts by search term' in `tests/facts.spec.js` is currently skipped. To fix this, the test needs to create a new fact to search for, which requires implementing a `POST /api/facts` endpoint and the corresponding `createFact` service function.
+- [ ] **Onboarding:** Create a more guided onboarding experience for new users, explaining how to get an API key and the purpose of the application.
 
 ## Medium Priority
 - [ ] **Investigate Suggested Todos API:** Test for a "suggestion" event via a WebSocket connection using the `websocket-test.js` script when a new suggestion is likely to be pushed by the server.
@@ -12,11 +13,6 @@ This document outlines the development tasks for the Bee Web UI project.
 - [ ] **Improve Error Handling:** Provide more specific and user-friendly error messages in the UI instead of generic "failed to..." alerts.
 - [ ] **Implement Loading Indicators:** Implement more granular loading indicators (e.g., spinners on individual buttons) to provide better feedback during API requests.
 - [ ] **Improve Empty States:** Enhance "empty state" messages (e.g., "No todos found") with more helpful text and perhaps a button to create a new item.
-- [ ] **Implement Conversation Detail View:** Use `getConversation` to fetch and display a single, detailed conversation.
-- [ ] **Implement Conversation End:** Allow users to manually end a conversation using `endConversation`.
-- [ ] **Implement Conversation Retry:** Allow users to retry a conversation that may have failed using `retryConversation`.
-- [ ] **Implement Location Display:** Display a map or list of locations associated with conversations using `getLocations`.
-- [ ] **Integrate WebSockets:** Use the `connect`, `disconnect`, and `on` methods to listen for real-time events from the Bee API, such as new suggested todos or conversation updates.
 
 ## Low Priority
 - [ ] **Improve Visual Design and Branding:** Enhance the overall visual design and branding of the application.
@@ -25,6 +21,10 @@ This document outlines the development tasks for the Bee Web UI project.
 
 ## Blocked Tasks
 - [ ] **Todos Page - Separate Sections:** Separate todos into three sections: "Unconfirmed", "Incomplete", and "Completed". (Blocked by Bee.computer API clarification on "suggested todos")
+
+## Project Organization
+- [ ] **Centralize Generated Files:** Ensure all generated files (e.g., test results, reports, logs) are directed to and stored within the `logs/` directory.
+- [ ] **Remove Redundant Docs Folder:** Delete the `docs/bee extra docs` folder as its contents are no longer needed or are redundant.
 
 ## Completed Tasks
 

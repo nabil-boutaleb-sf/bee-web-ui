@@ -5,19 +5,8 @@ We welcome contributions to the Bee Web UI project! Whether you're fixing a bug,
 ## How to Contribute
 
 1.  **Fork the Repository:** Start by forking the `bee-web-ui` repository to your GitHub account.
-2.  **Clone Your Fork:** Clone your forked repository to your local machine:
-    ```bash
-    git clone https://github.com/YOUR_USERNAME/bee-web-ui.git
-    cd bee-web-ui
-    ```
-3.  **Install Dependencies:** Install the project dependencies:
-    ```bash
-    npm install
-    ```
+2.  **Clone Your Fork:** Clone your forked repository to your local machine
 4.  **Create a New Branch:** Create a new branch for your feature or bug fix. Use a descriptive name (e.g., `feat/add-dark-mode`, `fix/login-bug`).
-    ```bash
-    git checkout -b feat/your-feature-name
-    ```
 5.  **Configure API Token:**
     *   For development, it's recommended to create a `.env` file in the project root and add your `BEE_API_TOKEN`:
         ```
@@ -26,24 +15,11 @@ We welcome contributions to the Bee Web UI project! Whether you're fixing a bug,
     *   Alternatively, you can use the in-browser API key submission on the home page.
 6.  **Make Your Changes:** Implement your feature or bug fix. Ensure your code adheres to the existing style and conventions.
 7.  **Write Tests:** For new features or significant bug fixes, please write corresponding Playwright end-to-end tests in the `tests/` directory.
-8.  **Run Tests:** Before committing, run all tests to ensure your changes haven't introduced any regressions:
-    ```bash
-    npm start & # Start the server in the background
-    npx playwright test
-    # After tests, stop the server
-    # kill <PID of npm start process> or use `killall node` if safe
-    ```
+8.  **Run Tests:** Before committing, run all tests to ensure your changes haven't introduced any regressions.
 9.  **Manual Testing:** Perform a brief manual test of the affected functionality in your browser.
 10. **Update Documentation:** If your changes affect how the application is used, installed, or configured, please update the relevant documentation (`README.md`, `CHANGELOG.md`, `DESIGN.md`, `TASKS.md`).
 11. **Commit Your Changes:** Commit your changes with a clear and concise commit message. Follow the [Commit Message Formatting](#commit-message-formatting) guidelines (if defined in `GEMINI.md`).
-    ```bash
-    git add .
-    git commit -m "feat: Your descriptive commit message"
-    ```
-12. **Push to Your Fork:** Push your new branch to your forked repository on GitHub:
-    ```bash
-    git push origin feat/your-feature-name
-    ```
+12. **Push to Your Fork:** Push your new branch to your forked repository on GitHub.
 13. **Create a Pull Request:** Go to the original `bee-web-ui` repository on GitHub and open a new Pull Request from your forked branch. Provide a clear description of your changes.
 
 ## Code Style
