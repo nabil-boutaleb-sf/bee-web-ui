@@ -3,40 +3,28 @@
 This document outlines the development tasks for the Bee Web UI project.
 
 ## High Priority
-- [ ] **Fix Skipped Tests:**
-    - [ ] The test 'should filter unconfirmed facts by search term' in `tests/facts.spec.js` is currently skipped. To fix this, the test needs to create a new fact to search for, which requires implementing a `POST /api/facts` endpoint and the corresponding `createFact` service function.
-
-## Blocked Tasks
-- [ ] **Todos Page:**
-    - [ ] Separate todos into three sections: "Unconfirmed", "Incomplete", and "Completed". (Blocked by Bee.computer API clarification on "suggested todos")
+- [ ] **Implement Fact Creation:** The test 'should filter unconfirmed facts by search term' in `tests/facts.spec.js` is currently skipped. To fix this, the test needs to create a new fact to search for, which requires implementing a `POST /api/facts` endpoint and the corresponding `createFact` service function.
 
 ## Medium Priority
 - [ ] **Investigate Suggested Todos API:** Test for a "suggestion" event via a WebSocket connection using the `websocket-test.js` script when a new suggestion is likely to be pushed by the server.
+- [ ] **Implement Todo Creation:** Add an inline creation form for new todos and implement the corresponding `POST /api/todos` endpoint and `createTodo` service function.
+- [ ] **Implement Fact Creation (UI):** Add an inline creation form for new facts.
+- [ ] **Improve Error Handling:** Provide more specific and user-friendly error messages in the UI instead of generic "failed to..." alerts.
+- [ ] **Implement Loading Indicators:** Implement more granular loading indicators (e.g., spinners on individual buttons) to provide better feedback during API requests.
+- [ ] **Improve Empty States:** Enhance "empty state" messages (e.g., "No todos found") with more helpful text and perhaps a button to create a new item.
+- [ ] **Implement Conversation Detail View:** Use `getConversation` to fetch and display a single, detailed conversation.
+- [ ] **Implement Conversation End:** Allow users to manually end a conversation using `endConversation`.
+- [ ] **Implement Conversation Retry:** Allow users to retry a conversation that may have failed using `retryConversation`.
+- [ ] **Implement Location Display:** Display a map or list of locations associated with conversations using `getLocations`.
+- [ ] **Integrate WebSockets:** Use the `connect`, `disconnect`, and `on` methods to listen for real-time events from the Bee API, such as new suggested todos or conversation updates.
 
 ## Low Priority
-- [ ] **General UI/UX:**
-    - [ ] Add an inline creation form for new items (facts, todos).
-    - [ ] Improve the visual design and branding.
+- [ ] **Improve Visual Design and Branding:** Enhance the overall visual design and branding of the application.
+- [ ] **Implement Settings Page:** Add a settings page where users can manage their API key and other preferences.
+- [ ] **Implement Item Detail Views:** Use `getFact` and `getTodo` to create detail views for individual items, which might contain more information than the list view.
 
-## Future Usability Improvements
-- **Onboarding:** Create a more guided onboarding experience for new users, explaining how to get an API key and the purpose of the application.
-- **Error Handling:** Provide more specific and user-friendly error messages in the UI instead of generic "failed to..." alerts.
-- **Loading Indicators:** Implement more granular loading indicators (e.g., spinners on individual buttons) to provide better feedback during API requests.
-- **Empty States:** Improve the "empty state" messages (e.g., "No todos found") with more helpful text and perhaps a button to create a new item.
-- **Configuration:** Add a settings page where users can manage their API key and other preferences.
-
-## Untapped API Features
-- **Create Facts:** Implement functionality to create new facts (`createFact`).
-- **Create Todos:** Implement functionality to create new todos (`createTodo`).
-- **Get Single Item:** Use `getFact` and `getTodo` to create a detail view for individual items, which might contain more information than the list view.
-- **Conversation Management:**
-    - `getConversation`: Fetch and display a single, detailed conversation.
-    - `endConversation`: Allow users to manually end a conversation.
-    - `retryConversation`: Allow users to retry a conversation that may have failed.
-- **Location Data:**
-    - `getLocations`: Display a map or list of locations associated with conversations.
-- **WebSockets:**
-    - Use the `connect`, `disconnect`, and `on` methods to listen for real-time events from the Bee API, such as new suggested todos or conversation updates.
+## Blocked Tasks
+- [ ] **Todos Page - Separate Sections:** Separate todos into three sections: "Unconfirmed", "Incomplete", and "Completed". (Blocked by Bee.computer API clarification on "suggested todos")
 
 ## Completed Tasks
 
@@ -124,3 +112,4 @@ This document outlines the development tasks for the Bee Web UI project.
     -   [x] Update `TASKS.md` with new sections for future improvements.
 -   **UI/UX:**
     -   [x] Refine the API key input message.
+    -   [x] Make the API key input field similar to search fields on other pages.
